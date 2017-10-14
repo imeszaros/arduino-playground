@@ -34,22 +34,17 @@
 		<link>
 			<name>core/core</name>
 			<type>2</type>
-			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.20/cores/arduino</locationURI>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.19/cores/arduino</locationURI>
 		</link>
 		<link>
 			<name>core/variant</name>
 			<type>2</type>
-			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.20/variants/eightanaloginputs</locationURI>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.19/variants/eightanaloginputs</locationURI>
 		</link>
 		<link>
-			<name>libraries/Adafruit_MCP4725-master</name>
+			<name>libraries/SoftI2CMaster</name>
 			<type>2</type>
-			<location>C:/Users/HydroGlobe/Documents/Arduino/libraries/Adafruit_MCP4725-master</location>
-		</link>
-		<link>
-			<name>libraries/Wire</name>
-			<type>2</type>
-			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.20/libraries/Wire</locationURI>
+			<location>C:/Users/conta/Documents/Arduino/libraries/SoftI2CMaster</location>
 		</link>
 	</linkedResources>
 </projectDescription>

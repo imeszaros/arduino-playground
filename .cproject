@@ -21,9 +21,7 @@
 								<option id="io.sloeber.compiler.cpp.sketch.option.incpath.782484566" name="Include Paths (-I)" superClass="io.sloeber.compiler.cpp.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/core/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/libraries/Adafruit_MCP4725-master}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/libraries/Wire}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/libraries/Wire/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/libraries/SoftI2CMaster}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.154988278" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
@@ -31,9 +29,7 @@
 								<option id="io.sloeber.compiler.c.sketch.option.incpath.1927073558" name="Include Paths (-I)" superClass="io.sloeber.compiler.c.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/core/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/libraries/Adafruit_MCP4725-master}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/libraries/Wire}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/libraries/Wire/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/libraries/SoftI2CMaster}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.c.sketch.input.2099569618" name="C Source Files" superClass="io.sloeber.compiler.c.sketch.input"/>
 							</tool>
@@ -41,9 +37,7 @@
 								<option id="io.sloeber.compiler.asm.sketch.option.incpath.182481246" name="Include Paths (-I)" superClass="io.sloeber.compiler.asm.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/core/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/libraries/Adafruit_MCP4725-master}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/libraries/Wire}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/libraries/Wire/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PropGame/libraries/SoftI2CMaster}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.1031947596" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>
