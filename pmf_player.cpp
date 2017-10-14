@@ -307,7 +307,6 @@ void pmf_player::update()
       else
         apply_channel_effects();
       evaluate_envelopes();
-      visualize_pattern_frame();
       m_batch_pos=0;
     }
   } while(subbuffer.num_samples);

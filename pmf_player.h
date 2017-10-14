@@ -82,7 +82,6 @@ private:
   void process_pattern_row();
   void process_track_row(audio_channel&, uint8_t &note_idx_, uint8_t &inst_idx_, uint8_t &volume_, uint8_t &effect_, uint8_t &effect_data_);
   void init_pattern(uint8_t playlist_pos_, uint8_t row_=0);
-  void visualize_pattern_frame();
   //-------------------------------------------------------------------------
 
   //=========================================================================

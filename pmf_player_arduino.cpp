@@ -110,8 +110,6 @@ void pmf_player::start_playback()
 {
   // setup pins
   DDRD=0xff;
-  DDRB=0x3f;
-  DDRC=0x3f;
 
   // clear audio buffer
   for(unsigned i=0; i<pmfplayer_audio_buffer_size; ++i)
@@ -239,26 +237,6 @@ pmf_player::mixer_buffer pmf_player::get_mixer_buffer()
   return buf;
 }
 //----
-
-void pmf_player::visualize_pattern_frame()
-{
-  // get LED states
-  uint16_t led_bits=0;
-  for(unsigned ci=0; ci<m_num_playback_channels; ++ci)
-  {
-    audio_channel &chl=m_channels[ci];
-    if(chl.note_hit)
-    {
-      led_bits|=1<<ci;
-      chl.note_hit=0;
-    }
-  }
-
-  // set LEDs
-  PORTB=led_bits;
-  PORTC=led_bits>>6;
-}
-//---------------------------------------------------------------------------
 
 //===========================================================================
 #endif // __AVR_ATmega328P__
