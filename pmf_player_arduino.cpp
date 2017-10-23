@@ -27,6 +27,14 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define DAC_MCP49XX_SS_PORT PORTB
+#define DAC_MCP49XX_SS_PIN 2
+#define DAC_MCP49XX_LDAC_PORT PORTD
+#define DAC_MCP49XX_LDAC_PIN 7
+
+#include <SPI.h>
+#include "DAC_MCP49xx.h"
+
 #include "pmf_player.h"
 #if defined(__AVR_ATmega328P__)
 #include "pmf_data.h"
@@ -43,6 +51,9 @@ static int16_t *volatile s_buffer_playback_pos;
 static uint8_t s_subbuffer_write_idx=0;
 //---------------------------------------------------------------------------
 
+static volatile uint8_t output;
+
+static DAC_MCP49xx dac(DAC_MCP49xx::MCP4921);
 
 //===========================================================================
 // pmf_player
@@ -76,7 +87,7 @@ ISR(TIMER1_COMPA_vect)
     "lsl %B[smp] \n\t"
     "sbc %B[smp], %B[smp] \n\t "
     "com %B[smp] \n\t"
-    "out %[port_d], %B[smp] \n\t"
+	"mov %[output], %B[smp] \n\t"
     "rjmp check_buffer_restart_%= \n\t"
 
     "restart_buffer_%=: \n\t"
@@ -86,7 +97,7 @@ ISR(TIMER1_COMPA_vect)
 
     "no_sample_clamp_%=: \n\t"
     "ror %A[smp] \n\t"
-    "out %[port_d], %A[smp] \n\t"
+	"mov %[output], %A[smp] \n\t"
 
     "check_buffer_restart_%=: \n\t"
     "cpi %A[buffer_pos], lo8(%[buffer_end]) \n\t"
@@ -98,19 +109,19 @@ ISR(TIMER1_COMPA_vect)
 
     :[buffer_pos] "+e" (s_buffer_playback_pos)
     ,[smp] "=&r" (smp)
+    ,[output] "=&r" (output)
     :[buffer_begin] "p" (s_buffer)
     ,[buffer_end] "p" (s_buffer+pmfplayer_audio_buffer_size)
     ,[mid_buffer_value_hi] "X" (&s_mid_buffer_value_hi)
-    ,[port_d] "I" (_SFR_IO_ADDR(PORTD))
   );
+
+  unsigned short value = ((unsigned short) output) * 16;
+  dac.output(value);
 }
 //----
 
 void pmf_player::start_playback()
 {
-  // setup pins
-  DDRD=0xff;
-
   // clear audio buffer
   for(unsigned i=0; i<pmfplayer_audio_buffer_size; ++i)
     s_buffer[i]=0x80<<PMF_AUDIO_LEVEL;
@@ -123,6 +134,8 @@ void pmf_player::start_playback()
   TCCR1C=0;
   TIMSK1=_BV(OCIE1A);          // enable timer 1 counter A
   OCR1A=(16000000+pmfplayer_sampling_rate/2)/pmfplayer_sampling_rate;
+
+  dac.setSPIDivider(SPI_CLOCK_DIV2);
 }
 //----
 
