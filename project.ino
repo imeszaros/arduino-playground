@@ -17,6 +17,8 @@ void setup()
   debouncer.attach(BTN_MUSIC);
   debouncer.interval(5);
 
+  s_player.enable_output();
+
   if (music) {
 	  s_player.start(s_pmf_file);
   }
@@ -34,9 +36,16 @@ void loop()
 	 // Serial.println(music);
 	  music = !music;
 	  if (music) {
+		  playButtonPress();
 		  s_player.start(s_pmf_file);
 	  } else {
+		  playButtonPress();
 		  s_player.stop();
 	  }
   }
+}
+
+void playButtonPress() {
+	uint16_t size = sizeof(s_btn_wave) / sizeof(s_btn_wave[0]);
+	s_player.mixin(s_btn_wave, size);
 }

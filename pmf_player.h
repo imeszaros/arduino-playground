@@ -49,7 +49,6 @@ class pmf_player;
 #define PMF_AUDIO_LEVEL 2
 enum {pmfplayer_sampling_rate=24000};    // playback frequency in Hz
 enum {pmfplayer_max_channels=16};        // maximum number of audio playback channels
-enum {pmfplayer_led_beat_ticks=1};       // number of ticks to display LED upon not hit
 //---------------------------------------------------------------------------
 
 
@@ -65,7 +64,10 @@ public:
   //-------------------------------------------------------------------------
 
   // player control
+  void enable_output();
+  void disable_output();
   void start(const void *pmem_pmf_file_);
+  void mixin(const void *pmem_wave_, uint16_t size);
   void stop();
   void update();
   //-------------------------------------------------------------------------

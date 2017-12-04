@@ -51,74 +51,102 @@ static int16_t *volatile s_buffer_playback_pos;
 static uint8_t s_subbuffer_write_idx=0;
 //---------------------------------------------------------------------------
 
+static bool pmf_playback;
 static volatile uint8_t output;
-
 static DAC_MCP49xx dac(DAC_MCP49xx::MCP4921);
+
+static const uint8_t *mixin_wave;
+static uint16_t mixin_size = 0;
+static uint16_t mixin_pos = 0;
 
 //===========================================================================
 // pmf_player
 //===========================================================================
 ISR(TIMER1_COMPA_vect)
 {
-  static const int8_t s_mid_buffer_value_hi=1<<(PMF_AUDIO_LEVEL-1);
-  int16_t smp;
-  asm volatile
-  (
-    "ld %A[smp], %a[buffer_pos] \n\t"
-    "st %a[buffer_pos]+, __zero_reg__ \n\t"
-    "ld %B[smp], %a[buffer_pos] \n\t"
-    "lds __tmp_reg__, %[mid_buffer_value_hi] \n\t"
-    "st %a[buffer_pos]+, __tmp_reg__ \n\t"
+  if (pmf_playback) {
+	  static const int8_t s_mid_buffer_value_hi=1<<(PMF_AUDIO_LEVEL-1);
+	  int16_t smp;
+	  asm volatile
+	  (
+		"ld %A[smp], %a[buffer_pos] \n\t"
+		"st %a[buffer_pos]+, __zero_reg__ \n\t"
+		"ld %B[smp], %a[buffer_pos] \n\t"
+		"lds __tmp_reg__, %[mid_buffer_value_hi] \n\t"
+		"st %a[buffer_pos]+, __tmp_reg__ \n\t"
 
 #if PMF_AUDIO_LEVEL>1
-    "asr %B[smp] \n\t"
-    "ror %A[smp] \n\t"
+		"asr %B[smp] \n\t"
+		"ror %A[smp] \n\t"
 #endif
 #if PMF_AUDIO_LEVEL>2
-    "asr %B[smp] \n\t"
-    "ror %A[smp] \n\t"
+		"asr %B[smp] \n\t"
+		"ror %A[smp] \n\t"
 #endif
 #if PMF_AUDIO_LEVEL>3
-    "asr %B[smp] \n\t"
-    "ror %A[smp] \n\t"
+		"asr %B[smp] \n\t"
+		"ror %A[smp] \n\t"
 #endif
-    "asr %B[smp] \n\t"
-    "breq no_sample_clamp_%= \n\t"
-    "lsl %B[smp] \n\t"
-    "sbc %B[smp], %B[smp] \n\t "
-    "com %B[smp] \n\t"
-	"mov %[output], %B[smp] \n\t"
-    "rjmp check_buffer_restart_%= \n\t"
+		"asr %B[smp] \n\t"
+		"breq no_sample_clamp_%= \n\t"
+		"lsl %B[smp] \n\t"
+		"sbc %B[smp], %B[smp] \n\t "
+		"com %B[smp] \n\t"
+		"mov %[output], %B[smp] \n\t"
+		"rjmp check_buffer_restart_%= \n\t"
 
-    "restart_buffer_%=: \n\t"
-    "ldi %A[buffer_pos], lo8(%[buffer_begin]) \n\t"
-    "ldi %B[buffer_pos], hi8(%[buffer_begin]) \n\t"
-    "rjmp done_%= \n\t\n\t"
+		"restart_buffer_%=: \n\t"
+		"ldi %A[buffer_pos], lo8(%[buffer_begin]) \n\t"
+		"ldi %B[buffer_pos], hi8(%[buffer_begin]) \n\t"
+		"rjmp done_%= \n\t\n\t"
 
-    "no_sample_clamp_%=: \n\t"
-    "ror %A[smp] \n\t"
-	"mov %[output], %A[smp] \n\t"
+		"no_sample_clamp_%=: \n\t"
+		"ror %A[smp] \n\t"
+		"mov %[output], %A[smp] \n\t"
 
-    "check_buffer_restart_%=: \n\t"
-    "cpi %A[buffer_pos], lo8(%[buffer_end]) \n\t"
-    "ldi %A[smp], hi8(%[buffer_end]) \n\t"
-    "cpc %B[buffer_pos], %A[smp] \n\t"
-    "breq restart_buffer_%= \n\t"
+		"check_buffer_restart_%=: \n\t"
+		"cpi %A[buffer_pos], lo8(%[buffer_end]) \n\t"
+		"ldi %A[smp], hi8(%[buffer_end]) \n\t"
+		"cpc %B[buffer_pos], %A[smp] \n\t"
+		"breq restart_buffer_%= \n\t"
 
-    "done_%=: \n\t"
+		"done_%=: \n\t"
 
-    :[buffer_pos] "+e" (s_buffer_playback_pos)
-    ,[smp] "=&r" (smp)
-    ,[output] "=&r" (output)
-    :[buffer_begin] "p" (s_buffer)
-    ,[buffer_end] "p" (s_buffer+pmfplayer_audio_buffer_size)
-    ,[mid_buffer_value_hi] "X" (&s_mid_buffer_value_hi)
-  );
+		:[buffer_pos] "+e" (s_buffer_playback_pos)
+		,[smp] "=&r" (smp)
+		,[output] "=&r" (output)
+		:[buffer_begin] "p" (s_buffer)
+		,[buffer_end] "p" (s_buffer+pmfplayer_audio_buffer_size)
+		,[mid_buffer_value_hi] "X" (&s_mid_buffer_value_hi)
+	  );
+  } else {
+	  output = 0;
+  }
 
-  unsigned short value = ((unsigned short) output) * 16;
-  dac.output(value);
+  if (mixin_pos < mixin_size) {
+	  uint16_t temp = output;
+	  temp += pgm_read_byte(mixin_wave + mixin_pos);
+	  output = temp / 2;
+	  mixin_pos++;
+  }
+
+  dac.output(((unsigned short) output) * 16);
 }
 //----
+
+void pmf_player::enable_output() {
+	dac.setSPIDivider(SPI_CLOCK_DIV2);
+
+	TCCR1A=0;
+	TCCR1B=_BV(CS10)|_BV(WGM12); // CTC mode 4 (OCR1A)
+	TCCR1C=0;
+	TIMSK1=_BV(OCIE1A);          // enable timer 1 counter A
+	OCR1A=(16000000+pmfplayer_sampling_rate/2)/pmfplayer_sampling_rate;
+}
+
+void pmf_player::disable_output() {
+	TIMSK1=0;
+}
 
 void pmf_player::start_playback()
 {
@@ -128,22 +156,21 @@ void pmf_player::start_playback()
   s_buffer_playback_pos=s_buffer;
   s_subbuffer_write_idx=1;
 
-  // enable playback interrupt at given playback frequency
-  TCCR1A=0;
-  TCCR1B=_BV(CS10)|_BV(WGM12); // CTC mode 4 (OCR1A)
-  TCCR1C=0;
-  TIMSK1=_BV(OCIE1A);          // enable timer 1 counter A
-  OCR1A=(16000000+pmfplayer_sampling_rate/2)/pmfplayer_sampling_rate;
-
-  dac.setSPIDivider(SPI_CLOCK_DIV2);
+  pmf_playback = true;
 }
 //----
 
 void pmf_player::stop_playback()
 {
-  TIMSK1=0;
+	pmf_playback = false;
 }
 //----
+
+void pmf_player::mixin(const void *pmem_wave_, uint16_t size) {
+	mixin_wave = static_cast<const uint8_t*>(pmem_wave_);
+	mixin_size = size;
+	mixin_pos = 0;
+}
 
 void pmf_player::mix_buffer(mixer_buffer &buf_, unsigned num_samples_)
 {
