@@ -120,7 +120,7 @@ ISR(TIMER1_COMPA_vect)
 		,[mid_buffer_value_hi] "X" (&s_mid_buffer_value_hi)
 	  );
   } else {
-	  output = 0;
+	  output = 127;
   }
 
   if (mixin_pos < mixin_size) {

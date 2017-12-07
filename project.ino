@@ -6,6 +6,7 @@
 
 static pmf_player s_player;
 Bounce debouncer = Bounce();
+Bounce debouncer2 = Bounce();
 
 bool music = true;
 
@@ -13,9 +14,13 @@ void setup()
 {
 	//Serial.begin(9600);
   pinMode(BTN_MUSIC, INPUT);
+  pinMode(7, INPUT);
 
   debouncer.attach(BTN_MUSIC);
   debouncer.interval(5);
+
+  debouncer2.attach(7);
+  debouncer2.interval(5);
 
   s_player.enable_output();
 
@@ -27,6 +32,7 @@ void setup()
 void loop()
 {
 	debouncer.update();
+	debouncer2.update();
 
 	if (music) {
 		s_player.update();
@@ -42,6 +48,10 @@ void loop()
 		  playButtonPress();
 		  s_player.stop();
 	  }
+  }
+
+  if (debouncer2.rose()) {
+	  playButtonPress();
   }
 }
 
