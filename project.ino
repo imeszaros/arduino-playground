@@ -1,61 +1,111 @@
+#include <EEPROM.h>
 #include <Bounce2.h>
+
 #include "pmf_player.h"
 #include "pmf_tune.cpp"
 
-#define BTN_MUSIC 8
+#define BTN_RESET 2
+#define BTN_MUSIC 3
+#define BTN_SOUND 4
+#define BTN_ROTATE 5
+#define BTN_LEFT 6
+#define BTN_RIGHT 7
+#define BTN_DOWN 8
 
-static pmf_player s_player;
-Bounce debouncer = Bounce();
-Bounce debouncer2 = Bounce();
+#define EE_ADDR_MUSIC 0
+#define EE_ADDR_SOUND EE_ADDR_MUSIC + sizeof(bool)
 
-bool music = true;
+static pmf_player audio;
 
-void setup()
-{
-	//Serial.begin(9600);
-  pinMode(BTN_MUSIC, INPUT);
-  pinMode(7, INPUT);
+static Bounce resetButton = Bounce();
+static Bounce musicButton = Bounce();
+static Bounce soundButton = Bounce();
+static Bounce rotateButton = Bounce();
+static Bounce leftButton = Bounce();
+static Bounce rightButton = Bounce();
+static Bounce downButton = Bounce();
 
-  debouncer.attach(BTN_MUSIC);
-  debouncer.interval(5);
+static bool music = true;
+static bool sound = true;
 
-  debouncer2.attach(7);
-  debouncer2.interval(5);
+void setup() {
+	resetButton.attach(BTN_RESET, INPUT);
+	resetButton.interval(5);
 
-  s_player.enable_output();
+	musicButton.attach(BTN_MUSIC, INPUT);
+	musicButton.interval(5);
 
-  if (music) {
-	  s_player.start(s_pmf_file);
-  }
+	soundButton.attach(BTN_MUSIC, INPUT);
+	soundButton.interval(5);
+
+	rotateButton.attach(BTN_MUSIC, INPUT);
+	rotateButton.interval(5);
+
+	leftButton.attach(BTN_MUSIC, INPUT);
+	leftButton.interval(5);
+
+	rightButton.attach(BTN_MUSIC, INPUT);
+	rightButton.interval(5);
+
+	downButton.attach(BTN_MUSIC, INPUT);
+	downButton.interval(5);
+
+	EEPROM.get(EE_ADDR_MUSIC, music);
+	EEPROM.get(EE_ADDR_SOUND, sound);
+
+	audio.enable_output();
+
+	playGameMusic();
 }
 
-void loop()
-{
-	debouncer.update();
-	debouncer2.update();
+void loop() {
+	resetButton.update();
+	musicButton.update();
+	soundButton.update();
+	rotateButton.update();
+	leftButton.update();
+	rightButton.update();
+	downButton.update();
 
 	if (music) {
-		s_player.update();
+		audio.update();
 	}
 
-  if (debouncer.rose()) {
-	 // Serial.println(music);
-	  music = !music;
-	  if (music) {
-		  playButtonPress();
-		  s_player.start(s_pmf_file);
-	  } else {
-		  playButtonPress();
-		  s_player.stop();
-	  }
-  }
+	if (musicButton.rose()) {
+		music = !music;
+		if (music) {
+			playGameMusic();
+		} else {
+			stopMusic();
+		}
+		playButtonPressSound();
+		EEPROM.put(EE_ADDR_MUSIC, music);
+	}
 
-  if (debouncer2.rose()) {
-	  playButtonPress();
-  }
+	if (soundButton.rose()) {
+		sound = !sound;
+		playButtonPressSound();
+		EEPROM.put(EE_ADDR_SOUND, sound);
+	}
 }
 
-void playButtonPress() {
-	uint16_t size = sizeof(s_btn_wave) / sizeof(s_btn_wave[0]);
-	s_player.mixin(s_btn_wave, size);
+void playMusic(const void *track) {
+	if (music) {
+		audio.start(track);
+	}
+}
+
+void stopMusic() {
+	if (music) {
+		audio.stop();
+	}
+}
+
+void playGameMusic() {
+	playMusic(gameMusic);
+}
+
+void playButtonPressSound() {
+	const uint16_t size = sizeof(buttonSound) / sizeof(buttonSound[0]);
+	audio.mixin(buttonSound, size);
 }

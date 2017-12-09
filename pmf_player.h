@@ -39,7 +39,7 @@
 #include <Arduino.h>
 
 // new
-class pmf_player;
+//class pmf_player;
 //---------------------------------------------------------------------------
 
 
