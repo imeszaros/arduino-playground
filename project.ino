@@ -4,13 +4,13 @@
 #include "pmf_player.h"
 #include "pmf_tune.cpp"
 
-#define BTN_RESET 2
-#define BTN_MUSIC 3
-#define BTN_SOUND 4
+#define BTN_RESET 8
+#define BTN_MUSIC 7
+#define BTN_SOUND 6
 #define BTN_ROTATE 5
-#define BTN_LEFT 6
-#define BTN_RIGHT 7
-#define BTN_DOWN 8
+#define BTN_LEFT 2
+#define BTN_RIGHT 3
+#define BTN_DOWN 4
 
 #define EE_ADDR_MUSIC 0
 #define EE_ADDR_SOUND EE_ADDR_MUSIC + sizeof(bool)
@@ -25,8 +25,8 @@ static Bounce leftButton = Bounce();
 static Bounce rightButton = Bounce();
 static Bounce downButton = Bounce();
 
-static bool music = true;
-static bool sound = true;
+static byte music = true;
+static byte sound = true;
 
 void setup() {
 	resetButton.attach(BTN_RESET, INPUT);
@@ -35,19 +35,19 @@ void setup() {
 	musicButton.attach(BTN_MUSIC, INPUT);
 	musicButton.interval(5);
 
-	soundButton.attach(BTN_MUSIC, INPUT);
+	soundButton.attach(BTN_SOUND, INPUT);
 	soundButton.interval(5);
 
-	rotateButton.attach(BTN_MUSIC, INPUT);
+	rotateButton.attach(BTN_ROTATE, INPUT);
 	rotateButton.interval(5);
 
-	leftButton.attach(BTN_MUSIC, INPUT);
+	leftButton.attach(BTN_LEFT, INPUT);
 	leftButton.interval(5);
 
-	rightButton.attach(BTN_MUSIC, INPUT);
+	rightButton.attach(BTN_RIGHT, INPUT);
 	rightButton.interval(5);
 
-	downButton.attach(BTN_MUSIC, INPUT);
+	downButton.attach(BTN_DOWN, INPUT);
 	downButton.interval(5);
 
 	EEPROM.get(EE_ADDR_MUSIC, music);
@@ -69,6 +69,10 @@ void loop() {
 
 	if (music) {
 		audio.update();
+	}
+
+	if (resetButton.rose()) {
+		playButtonPressSound();
 	}
 
 	if (musicButton.rose()) {
@@ -96,9 +100,7 @@ void playMusic(const void *track) {
 }
 
 void stopMusic() {
-	if (music) {
-		audio.stop();
-	}
+	audio.stop();
 }
 
 void playGameMusic() {
@@ -106,6 +108,8 @@ void playGameMusic() {
 }
 
 void playButtonPressSound() {
-	const uint16_t size = sizeof(buttonSound) / sizeof(buttonSound[0]);
-	audio.mixin(buttonSound, size);
+	if (sound) {
+		const uint16_t size = sizeof(buttonSound) / sizeof(buttonSound[0]);
+		audio.mixin(buttonSound, size);
+	}
 }
