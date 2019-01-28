@@ -34,12 +34,12 @@
 		<link>
 			<name>core/core</name>
 			<type>2</type>
-			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.20/cores/arduino</locationURI>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/MightyCore/hardware/avr/2.0.1/cores/MCUdude_corefiles</locationURI>
 		</link>
 		<link>
 			<name>core/variant</name>
 			<type>2</type>
-			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.20/variants/eightanaloginputs</locationURI>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/MightyCore/hardware/avr/2.0.1/variants/standard</locationURI>
 		</link>
 		<link>
 			<name>libraries/Bounce2-master</name>
@@ -47,9 +47,14 @@
 			<location>C:/Users/HydroGlobe/Documents/Arduino/libraries/Bounce2-master</location>
 		</link>
 		<link>
+			<name>libraries/EEPROM</name>
+			<type>2</type>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/MightyCore/hardware/avr/2.0.1/libraries/EEPROM</locationURI>
+		</link>
+		<link>
 			<name>libraries/SPI</name>
 			<type>2</type>
-			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.20/libraries/SPI</locationURI>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/MightyCore/hardware/avr/2.0.1/libraries/SPI</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

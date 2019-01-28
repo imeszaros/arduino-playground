@@ -4,13 +4,13 @@
 #include "pmf_player.h"
 #include "pmf_tune.cpp"
 
-#define BTN_RESET 8
-#define BTN_MUSIC 7
-#define BTN_SOUND 6
-#define BTN_ROTATE 5
-#define BTN_LEFT 2
-#define BTN_RIGHT 3
-#define BTN_DOWN 4
+#define BTN_RESET 13
+#define BTN_MUSIC 12
+#define BTN_SOUND 11
+#define BTN_ROTATE 14
+#define BTN_LEFT 15
+#define BTN_RIGHT 16
+#define BTN_DOWN 17
 
 #define EE_ADDR_MUSIC 0
 #define EE_ADDR_SOUND EE_ADDR_MUSIC + sizeof(bool)

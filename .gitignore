@@ -1,2 +1,5 @@
 /.ino.cpp
 /Release/*
+/Release/
+/sloeber.ino.cpp
+/spec.d

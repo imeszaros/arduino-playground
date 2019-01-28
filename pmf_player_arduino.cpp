@@ -29,14 +29,14 @@
 
 #define DAC_MCP49XX_SS_PORT PORTB
 #define DAC_MCP49XX_SS_PIN 2
-#define DAC_MCP49XX_LDAC_PORT PORTD
-#define DAC_MCP49XX_LDAC_PIN 7
+#define DAC_MCP49XX_LDAC_PORT PORTB
+#define DAC_MCP49XX_LDAC_PIN 3
 
 #include <SPI.h>
 #include "DAC_MCP49xx.h"
 
 #include "pmf_player.h"
-#if defined(__AVR_ATmega328P__)
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__)
 #include "pmf_data.h"
 //---------------------------------------------------------------------------
 
@@ -279,4 +279,4 @@ pmf_player::mixer_buffer pmf_player::get_mixer_buffer()
 //----
 
 //===========================================================================
-#endif // __AVR_ATmega328P__
+#endif // __AVR_ATmega328P__ || __AVR_ATmega1284__ || __AVR_ATmega1284P__
