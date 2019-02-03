@@ -28,12 +28,10 @@
 //============================================================================
 
 #define DAC_MCP49XX_SS_PORT PORTB
-#define DAC_MCP49XX_SS_PIN 2
-#define DAC_MCP49XX_LDAC_PORT PORTB
-#define DAC_MCP49XX_LDAC_PIN 3
+#define DAC_MCP49XX_SS_PIN 4
 
 #include <SPI.h>
-#include "DAC_MCP49xx.h"
+#include "dac.h"
 
 #include "pmf_player.h"
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__)
@@ -53,7 +51,7 @@ static uint8_t s_subbuffer_write_idx=0;
 
 static bool pmf_playback;
 static volatile uint8_t output;
-static DAC_MCP49xx dac(DAC_MCP49xx::MCP4921);
+static DAC_MCP4921 dac;
 
 static const uint8_t *mixin_wave;
 static uint16_t mixin_size = 0;
@@ -141,7 +139,7 @@ void pmf_player::enable_output() {
 	TCCR1B=_BV(CS10)|_BV(WGM12); // CTC mode 4 (OCR1A)
 	TCCR1C=0;
 	TIMSK1=_BV(OCIE1A);          // enable timer 1 counter A
-	OCR1A=(16000000+pmfplayer_sampling_rate/2)/pmfplayer_sampling_rate;
+	OCR1A=(20000000+pmfplayer_sampling_rate/2)/pmfplayer_sampling_rate;
 }
 
 void pmf_player::disable_output() {

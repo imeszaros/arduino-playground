@@ -1,5 +1,5 @@
-#ifndef PFC_PMF_TUNE_CPP
-#define PFC_PMF_TUNE_CPP
+#ifndef AUDIO_DATE_CPP
+#define AUDIO_DATE_CPP
 
 #include "pmf_player.h"
 #include "pmf_data.h"
