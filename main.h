@@ -7,8 +7,9 @@
 #define SPI_UART1_DATA  11
 #define SPI_UART1_CLOCK 12
 #define NUM_LEDS        200
+#define LEDS_PER_ROW    10
 #define LED_TYPE        SK9822
-#define COLOR_ORDER     GRB
+#define COLOR_ORDER     BGR
 #define LED_FPS         100
 #include <FastLED.h>
 
@@ -29,6 +30,9 @@
 
 // button and sensor debouncing
 #include <Bounce2.h>
+
+// game engine
+#include "tetris.h"
 
 // pin configuration
 #define LED_SDI     11
@@ -60,13 +64,6 @@ void stopMusic();
 void playGameMusic();
 void playButtonPressSound();
 void playButtonPressVibra();
-
-//
-
-void FillLEDsFromPaletteColors(uint8_t colorIndex);
-void ChangePalettePeriodically();
-void SetupTotallyRandomPalette();
-void SetupBlackAndWhiteStripedPalette();
-void SetupPurpleAndGreenPalette();
+void pixel(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b);
 
 #endif

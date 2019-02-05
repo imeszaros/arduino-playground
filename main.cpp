@@ -1,15 +1,22 @@
 #include "main.h"
 
-extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
-
+// display
 CRGB leds[NUM_LEDS];
-CRGBPalette16 currentPalette;
-TBlendType    currentBlending;
+unsigned long lastLedUpdate = millis();
+
+// vibra-motor
 Adafruit_DRV2605 vibra;
+
+// tray control
 Tray tray(PI_CLSD, PI_OPEN, M_ENABLE, M_CTRL_1, M_CTRL_2);
 
+// audio output
 pmf_player audio;
 
+// game engine
+Tetris tetris(LEDS_PER_ROW, NUM_LEDS / LEDS_PER_ROW, &pixel);
+
+// buttons
 Bounce resetButton = Bounce();
 Bounce musicButton = Bounce();
 Bounce soundButton = Bounce();
@@ -18,17 +25,20 @@ Bounce leftButton = Bounce();
 Bounce rightButton = Bounce();
 Bounce downButton = Bounce();
 
+// music enabled
 byte music = true;
+
+// sound enabled
 byte sound = true;
 
-unsigned long ts = millis();
-
-//TODO temp
+// TODO remove
 byte trayState = 0;
 
 void setup() {
-    delay(3000); // power-up safety delay
+	// power-up safety delay
+    delay(500);
 
+    // initialize buttons
 	resetButton.attach(BTN_RESET, INPUT);
 	resetButton.interval(5);
 
@@ -53,21 +63,21 @@ void setup() {
 	EEPROM.get(EE_ADDR_MUSIC, music);
 	EEPROM.get(EE_ADDR_SOUND, sound);
 
+	// initialize audio output
 	audio.enable_output();
-
 	playGameMusic();
 
-	//
-    FastLED.addLeds<LED_TYPE, LED_SDI, LED_SCK, COLOR_ORDER, DATA_RATE_MHZ(20)>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-    FastLED.setMaxPowerInVoltsAndMilliamps(5,100);
-    currentPalette = RainbowColors_p;
-    currentBlending = LINEARBLEND;
-	//
+	// initialize display
+    FastLED.addLeds<LED_TYPE, LED_SDI, LED_SCK, COLOR_ORDER, DATA_RATE_MHZ(20)>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, 100); // TODO
+    FastLED.setBrightness(40); // TODO
 
+    // initialize vibra-motor
     vibra.begin();
     vibra.selectLibrary(1);
     vibra.setMode(DRV2605_MODE_INTTRIG);
 
+    // initialize tray control
     tray.init();
 }
 
@@ -109,19 +119,9 @@ void loop() {
 	}
 
 	if (rotateButton.rose()) {
+		tetris.rotateClockWise();
 		playButtonPressSound();
 		playButtonPressVibra();
-		switch (trayState) {
-		case 0:
-			trayState = 1;
-			break;
-		case 1:
-			trayState = 2;
-			break;
-		case 2:
-			trayState = 0;
-			break;
-		}
 	}
 
 	if (leftButton.rose()) {
@@ -139,20 +139,13 @@ void loop() {
 		playButtonPressVibra();
 	}
 
-	//
-    ChangePalettePeriodically();
-
-    static uint8_t startIndex = 0;
-    startIndex = startIndex + 1; /* motion speed */
-
-    FillLEDsFromPaletteColors( startIndex);
-
-    unsigned long x = millis();
-    if (ts - x > 100) {
-    	ts = x;
+    unsigned long now = millis();
+    if (lastLedUpdate - now > 100) {
+    	lastLedUpdate = now;
     	FastLED.show();
     }
 
+    // TODO remove
 	switch (trayState) {
 	case 0:
 		tray.setDesiredState(Tray::State::Off);
@@ -166,6 +159,8 @@ void loop() {
 	}
 
 	tray.update();
+
+	tetris.update();
 }
 
 void playMusic(const void *track) {
@@ -195,109 +190,7 @@ void playButtonPressVibra() {
 	vibra.go();
 }
 
-
-//
-
-void FillLEDsFromPaletteColors( uint8_t colorIndex)
-{
-    uint8_t brightness = 255;
-
-    for( int i = 0; i < NUM_LEDS; i++) {
-        leds[i] = ColorFromPalette( currentPalette, colorIndex, brightness, currentBlending);
-        colorIndex += 3;
-    }
+void pixel(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
+	uint8_t idx = y * LEDS_PER_ROW + (y % 2 == 0 ? x : LEDS_PER_ROW - x - 1);
+	leds[idx].setRGB(r, g, b);
 }
-
-
-// There are several different palettes of colors demonstrated here.
-//
-// FastLED provides several 'preset' palettes: RainbowColors_p, RainbowStripeColors_p,
-// OceanColors_p, CloudColors_p, LavaColors_p, ForestColors_p, and PartyColors_p.
-//
-// Additionally, you can manually define your own color palettes, or you can write
-// code that creates color palettes on the fly.  All are shown here.
-
-void ChangePalettePeriodically()
-{
-    uint8_t secondHand = (millis() / 1000) % 60;
-    static uint8_t lastSecond = 99;
-
-    if( lastSecond != secondHand) {
-        lastSecond = secondHand;
-        if( secondHand ==  0)  { currentPalette = RainbowColors_p;         currentBlending = LINEARBLEND; }
-        if( secondHand == 10)  { currentPalette = RainbowStripeColors_p;   currentBlending = NOBLEND;  }
-        if( secondHand == 15)  { currentPalette = RainbowStripeColors_p;   currentBlending = LINEARBLEND; }
-        if( secondHand == 20)  { SetupPurpleAndGreenPalette();             currentBlending = LINEARBLEND; }
-        if( secondHand == 25)  { SetupTotallyRandomPalette();              currentBlending = LINEARBLEND; }
-        if( secondHand == 30)  { SetupBlackAndWhiteStripedPalette();       currentBlending = NOBLEND; }
-        if( secondHand == 35)  { SetupBlackAndWhiteStripedPalette();       currentBlending = LINEARBLEND; }
-        if( secondHand == 40)  { currentPalette = CloudColors_p;           currentBlending = LINEARBLEND; }
-        if( secondHand == 45)  { currentPalette = PartyColors_p;           currentBlending = LINEARBLEND; }
-        if( secondHand == 50)  { currentPalette = myRedWhiteBluePalette_p; currentBlending = NOBLEND;  }
-        if( secondHand == 55)  { currentPalette = myRedWhiteBluePalette_p; currentBlending = LINEARBLEND; }
-    }
-}
-
-// This function fills the palette with totally random colors.
-void SetupTotallyRandomPalette()
-{
-    for( int i = 0; i < 16; i++) {
-        currentPalette[i] = CHSV( random8(), 255, random8());
-    }
-}
-
-// This function sets up a palette of black and white stripes,
-// using code.  Since the palette is effectively an array of
-// sixteen CRGB colors, the various fill_* functions can be used
-// to set them up.
-void SetupBlackAndWhiteStripedPalette()
-{
-    // 'black out' all 16 palette entries...
-    fill_solid( currentPalette, 16, CRGB::Black);
-    // and set every fourth one to white.
-    currentPalette[0] = CRGB::White;
-    currentPalette[4] = CRGB::White;
-    currentPalette[8] = CRGB::White;
-    currentPalette[12] = CRGB::White;
-
-}
-
-// This function sets up a palette of purple and green stripes.
-void SetupPurpleAndGreenPalette()
-{
-    CRGB purple = CHSV( HUE_PURPLE, 255, 255);
-    CRGB green  = CHSV( HUE_GREEN, 255, 255);
-    CRGB black  = CRGB::Black;
-
-    currentPalette = CRGBPalette16(
-                                   green,  green,  black,  black,
-                                   purple, purple, black,  black,
-                                   green,  green,  black,  black,
-                                   purple, purple, black,  black );
-}
-
-
-// This example shows how to set up a static color palette
-// which is stored in PROGMEM (flash), which is almost always more
-// plentiful than RAM.  A static PROGMEM palette like this
-// takes up 64 bytes of flash.
-const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM = {
-    CRGB::Red,
-    CRGB::Gray, // 'white' is too bright compared to red and blue
-    CRGB::Blue,
-    CRGB::Black,
-
-    CRGB::Red,
-    CRGB::Gray,
-    CRGB::Blue,
-    CRGB::Black,
-
-    CRGB::Red,
-    CRGB::Red,
-    CRGB::Gray,
-    CRGB::Gray,
-    CRGB::Blue,
-    CRGB::Blue,
-    CRGB::Black,
-    CRGB::Black
-};
