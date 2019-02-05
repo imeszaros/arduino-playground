@@ -47,9 +47,9 @@
 			<location>C:/Users/HydroGlobe/Documents/Arduino/libraries/Adafruit_DRV2605_Library</location>
 		</link>
 		<link>
-			<name>libraries/Bounce2-master</name>
+			<name>libraries/Bounce2</name>
 			<type>2</type>
-			<location>C:/Users/HydroGlobe/Documents/Arduino/libraries/Bounce2-master</location>
+			<location>C:/Users/HydroGlobe/Documents/Arduino/libraries/Bounce2</location>
 		</link>
 		<link>
 			<name>libraries/EEPROM</name>
