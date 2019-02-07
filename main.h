@@ -53,6 +53,10 @@
 #define M_CTRL_1 25
 #define M_CTRL_2 26
 
+// button repeat
+#define REPEAT_DELAY 400
+#define REPEAT_INTERVAL 50
+
 // memory address mapping
 #define EE_ADDR_MUSIC 0
 #define EE_ADDR_SOUND EE_ADDR_MUSIC + sizeof(bool)
@@ -64,6 +68,7 @@ void stopMusic();
 void playGameMusic();
 void playButtonPressSound();
 void playButtonPressVibra();
-void pixel(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b);
+void setLedColor(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b);
+bool buttonRepeat(bool reset);
 
 #endif

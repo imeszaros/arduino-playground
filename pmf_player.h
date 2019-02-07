@@ -47,7 +47,7 @@
 // PMF player config
 //===========================================================================
 #define PMF_AUDIO_LEVEL 2
-enum {pmfplayer_sampling_rate=24000};    // playback frequency in Hz
+enum {pmfplayer_sampling_rate=22050};    // playback frequency in Hz
 enum {pmfplayer_max_channels=16};        // maximum number of audio playback channels
 //---------------------------------------------------------------------------
 

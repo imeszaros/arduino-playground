@@ -182,7 +182,7 @@ public:
 
 	bool isOccupied(uint8_t x, uint8_t y);
 	void merge(Tetromino* tetromino);
-	void clearCompleteRows();
+	uint8_t clearCompleteRows();
 	void draw(tetDisplay display);
 	void truncate();
 
@@ -223,9 +223,9 @@ public:
 	Tetromino::Type preview();
 	bool moveLeft();
 	bool moveRight();
+	bool moveDown();
 	bool rotateClockWise();
 	bool rotateCounterClockWise();
-	void setDropping(bool dropping);
 	void setClearBackground(bool clearBackground);
 	void setGhostEnabled(bool ghostEnabled);
 	void setGhostColor(uint8_t r, uint8_t g, uint8_t b);
@@ -239,9 +239,10 @@ private:
 	Pile* _pile;
 	Bag* _bag;
 	unsigned long _lastDrop;
+	uint16_t _rowsCompleted;
 	uint16_t _speed;
+	uint8_t _level;
 	bool _gameOver;
-	bool _dropping;
 	bool _clearBackground;
 	bool _ghostEnabled;
 	uint8_t _ghostColor[3];
@@ -249,4 +250,5 @@ private:
 	bool _checkTetromino();
 	bool _move(uint8_t x, uint8_t y);
 	bool _rotate(Tetromino::Rotation to);
+	void _setDifficulty();
 };

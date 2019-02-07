@@ -25,6 +25,8 @@ Bounce leftButton = Bounce();
 Bounce rightButton = Bounce();
 Bounce downButton = Bounce();
 
+unsigned long lastButtonRepeat;
+
 // music enabled
 byte music = true;
 
@@ -37,6 +39,7 @@ byte trayState = 0;
 void setup() {
 	// power-up safety delay
     delay(500);
+    //Serial.begin(7680);
 
     // initialize buttons
 	resetButton.attach(BTN_RESET, INPUT);
@@ -69,8 +72,8 @@ void setup() {
 
 	// initialize display
     FastLED.addLeds<LED_TYPE, LED_SDI, LED_SCK, COLOR_ORDER, DATA_RATE_MHZ(20)>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 100); // TODO
-    FastLED.setBrightness(30); // TODO
+    //FastLED.setMaxPowerInVoltsAndMilliamps(5, 100); // TODO
+    FastLED.setBrightness(5); // TODO
 
     // initialize vibra-motor
     vibra.begin();
@@ -129,20 +132,30 @@ void loop() {
 	}
 
 	if (leftButton.rose()) {
+		buttonRepeat(true);
 		tetris.moveLeft();
 		playButtonPressSound();
 		playButtonPressVibra();
+	} else if (leftButton.read() && buttonRepeat(false)) {
+		tetris.moveLeft();
 	}
 
 	if (rightButton.rose()) {
+		buttonRepeat(true);
 		tetris.moveRight();
 		playButtonPressSound();
 		playButtonPressVibra();
+	} else if (rightButton.read() && buttonRepeat(false)) {
+		tetris.moveRight();
 	}
 
 	if (downButton.rose()) {
+		buttonRepeat(true);
+		tetris.moveDown();
 		playButtonPressSound();
 		playButtonPressVibra();
+	} else if (downButton.read() && buttonRepeat(false)) {
+		tetris.moveDown();
 	}
 
     unsigned long now = millis();
@@ -167,7 +180,7 @@ void loop() {
 	tray.update();
 
 	tetris.update();
-	tetris.draw(&pixel);
+	tetris.draw(&setLedColor);
 }
 
 void playMusic(const void *track) {
@@ -197,10 +210,26 @@ void playButtonPressVibra() {
 	vibra.go();
 }
 
-void pixel(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b) {
+void setLedColor(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b) {
 	if (x < 0 || x >= LEDS_PER_ROW || y < 0 || y >= (NUM_LEDS / LEDS_PER_ROW)) {
 		return;
 	}
 
 	leds[y * LEDS_PER_ROW + (y % 2 == 0 ? x : LEDS_PER_ROW - x - 1)].setRGB(r, g, b);
+}
+
+bool buttonRepeat(bool reset) {
+	unsigned long now = millis();
+
+	if (reset) {
+		lastButtonRepeat = now + REPEAT_DELAY - REPEAT_INTERVAL;
+		return false;
+	}
+
+	if (now > lastButtonRepeat && now - lastButtonRepeat > REPEAT_INTERVAL) {
+		lastButtonRepeat = now;
+		return true;
+	} else {
+		return false;
+	}
 }

@@ -86,7 +86,9 @@ void Pile::merge(Tetromino* tetromino) {
 	}
 }
 
-void Pile::clearCompleteRows() {
+uint8_t Pile::clearCompleteRows() {
+	uint8_t rowsCompleted = 0;
+
 	for (int8_t y = _height - 1; y >= 0; --y) {
 		bool empty = true;
 		bool full = true;
@@ -104,6 +106,8 @@ void Pile::clearCompleteRows() {
 		}
 
 		if (full) {
+			rowsCompleted++;
+
 			uint8_t _y = y;
 
 			for (; _y > 0; --_y) {
@@ -133,6 +137,8 @@ void Pile::clearCompleteRows() {
 			++y;
 		}
 	}
+
+	return rowsCompleted;
 }
 
 void Pile::draw(tetDisplay display) {
@@ -227,8 +233,9 @@ void Bag::shuffle() {
 }
 
 Tetris::Tetris(uint8_t _width,  uint8_t _height, unsigned int seed):
-	_width(_width), _height(_height), _lastDrop(0), _speed(500), _gameOver(true),
-	_dropping(false), _clearBackground(true), _ghostEnabled(true) {
+	_width(_width), _height(_height), _lastDrop(0),
+	_rowsCompleted(0), _speed(500), _level(1), _gameOver(true),
+	_clearBackground(true), _ghostEnabled(true) {
 
 	_tetromino = new Tetromino();
 	_pile = new Pile(_width, _height);
@@ -241,6 +248,8 @@ void Tetris::reset() {
 	_pile->truncate();
 	_bag->shuffle();
 	_tetromino->spawn(_bag->pop());
+	_rowsCompleted = 0;
+	_setDifficulty();
 	_gameOver = false;
 }
 
@@ -258,6 +267,10 @@ bool Tetris::moveLeft() {
 
 bool Tetris::moveRight() {
 	return _move(1, 0);
+}
+
+bool Tetris::moveDown() {
+	return _move(0, 1);
 }
 
 bool Tetris::rotateClockWise() {
@@ -290,10 +303,6 @@ bool Tetris::rotateCounterClockWise() {
 	}
 }
 
-void Tetris::setDropping(bool dropping) {
-	_speed = dropping ? 50 : 500;
-}
-
 void Tetris::setClearBackground(bool clearBackground) {
 	_clearBackground = clearBackground;
 }
@@ -320,7 +329,9 @@ void Tetris::update() {
 
 		if (!_move(0, 1)) {
 			_pile->merge(_tetromino);
-			_pile->clearCompleteRows();
+			_rowsCompleted += _pile->clearCompleteRows();
+
+			_setDifficulty();
 
 			_tetromino->spawn(_bag->pop());
 
@@ -425,4 +436,16 @@ bool Tetris::_rotate(Tetromino::Rotation to) {
 	_tetromino->rotation = from;
 
 	return false;
+}
+
+void Tetris::_setDifficulty() {
+	if (_rowsCompleted == 0) {
+		_level = 1;
+	} else if ((_rowsCompleted >= 1) && (_rowsCompleted <= 90)) {
+		_level = 1 + ((_rowsCompleted - 1) / 10);
+	} else if (_rowsCompleted >= 91) {
+		_level = 10;
+	}
+
+	_speed = (11 - _level) * 50;
 }
