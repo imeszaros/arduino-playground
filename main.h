@@ -64,6 +64,6 @@ void stopMusic();
 void playGameMusic();
 void playButtonPressSound();
 void playButtonPressVibra();
-void pixel(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b);
+void pixel(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b);
 
 #endif

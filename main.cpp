@@ -14,7 +14,7 @@ Tray tray(PI_CLSD, PI_OPEN, M_ENABLE, M_CTRL_1, M_CTRL_2);
 pmf_player audio;
 
 // game engine
-Tetris tetris(LEDS_PER_ROW, NUM_LEDS / LEDS_PER_ROW, &pixel);
+Tetris tetris(LEDS_PER_ROW, NUM_LEDS / LEDS_PER_ROW, millis()); // TODO analogRead
 
 // buttons
 Bounce resetButton = Bounce();
@@ -70,7 +70,7 @@ void setup() {
 	// initialize display
     FastLED.addLeds<LED_TYPE, LED_SDI, LED_SCK, COLOR_ORDER, DATA_RATE_MHZ(20)>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
     FastLED.setMaxPowerInVoltsAndMilliamps(5, 100); // TODO
-    FastLED.setBrightness(40); // TODO
+    FastLED.setBrightness(30); // TODO
 
     // initialize vibra-motor
     vibra.begin();
@@ -79,6 +79,9 @@ void setup() {
 
     // initialize tray control
     tray.init();
+
+    // initialize tetris
+    tetris.reset();
 }
 
 void loop() {
@@ -114,6 +117,7 @@ void loop() {
 	}
 
 	if (resetButton.rose()) {
+		tetris.reset();
 		playButtonPressSound();
 		playButtonPressVibra();
 	}
@@ -125,11 +129,13 @@ void loop() {
 	}
 
 	if (leftButton.rose()) {
+		tetris.moveLeft();
 		playButtonPressSound();
 		playButtonPressVibra();
 	}
 
 	if (rightButton.rose()) {
+		tetris.moveRight();
 		playButtonPressSound();
 		playButtonPressVibra();
 	}
@@ -161,6 +167,7 @@ void loop() {
 	tray.update();
 
 	tetris.update();
+	tetris.draw(&pixel);
 }
 
 void playMusic(const void *track) {
@@ -190,7 +197,10 @@ void playButtonPressVibra() {
 	vibra.go();
 }
 
-void pixel(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
-	uint8_t idx = y * LEDS_PER_ROW + (y % 2 == 0 ? x : LEDS_PER_ROW - x - 1);
-	leds[idx].setRGB(r, g, b);
+void pixel(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b) {
+	if (x < 0 || x >= LEDS_PER_ROW || y < 0 || y >= (NUM_LEDS / LEDS_PER_ROW)) {
+		return;
+	}
+
+	leds[y * LEDS_PER_ROW + (y % 2 == 0 ? x : LEDS_PER_ROW - x - 1)].setRGB(r, g, b);
 }
