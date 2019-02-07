@@ -321,7 +321,7 @@ bool Tetris::_rotate(Tetromino::Rotation to) {
 		uint8_t offsTo = _tetromino->getSRSOffset(to, i);
 
 		int8_t offX = srsOffsetX(offsFrom) - srsOffsetX(offsTo);
-		int8_t offY = srsOffsetY(offsFrom) - srsOffsetY(offsTo);
+		int8_t offY = -srsOffsetY(offsFrom) + srsOffsetY(offsTo);
 
 		_tetromino->x += offX;
 		_tetromino->y += offY;
