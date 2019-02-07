@@ -3,14 +3,14 @@
 constexpr Tetromino::_Data Tetromino::_data[];
 constexpr uint8_t Tetromino::_srsOffsets[];
 
-const uint8_t* Tetromino::colorOf(Type type) {
-	return _data[type].color;
+uint8_t* Tetromino::colorOf(Type type) {
+	return (uint8_t*) _data[type].color;
 }
 
 Tetromino::Tetromino():
 	type(Type::I), rotation(Rotation::rot0), x(0), y(0) {}
 
-const uint8_t* Tetromino::getColor() {
+uint8_t* Tetromino::getColor() {
 	return colorOf(type);
 }
 
@@ -36,7 +36,7 @@ uint8_t Tetromino::getSRSOffsetCount() {
 	return _srsOffsets[_data[type].srsOffsets];
 }
 
-uint8_t Tetromino::getSRSOffset(Tetromino::Rotation rotation, int idx) {
+uint8_t Tetromino::getSRSOffset(Tetromino::Rotation rotation, uint8_t idx) {
 	uint8_t count = getSRSOffsetCount();
 	return _srsOffsets[_data[type].srsOffsets + 1 + rotation * count + idx];
 }
@@ -48,15 +48,17 @@ void Tetromino::spawn(Tetromino::Type type) {
 	y = -uint4_right(_data[type].spawnCoords);
 }
 
-void Tetromino::draw(tetDisplay display) {
-	const uint8_t* col = getColor();
+void Tetromino::draw(tetDisplay display, uint8_t* color) {
+	if (color == NULL) {
+		color = getColor();
+	}
 
 	uint8_t w = getWidth();
 	uint8_t h = getHeight();
 
 	for (uint8_t i = 0, n = minoCount(w, h); i < n; ++i) {
 		if (isMino(i)) {
-			display(minoX(x, w, i), minoY(y, w, i), col[0], col[1], col[2]);
+			display(minoX(x, w, i), minoY(y, w, i), color[0], color[1], color[2]);
 		}
 	}
 }
@@ -66,7 +68,7 @@ Pile::Pile(uint8_t _width, uint8_t _height):
 
 	_data = (uint8_t*) malloc(sizeof(uint8_t) * _memSize());
 
-	clear();
+	truncate();
 }
 
 bool Pile::isOccupied(uint8_t x, uint8_t y) {
@@ -84,9 +86,58 @@ void Pile::merge(Tetromino* tetromino) {
 	}
 }
 
+void Pile::clearCompleteRows() {
+	for (int8_t y = _height - 1; y >= 0; --y) {
+		bool empty = true;
+		bool full = true;
+
+		for (uint8_t x = 0; x < _width; ++x) {
+			if (_get(x, y) == Tetromino::Type::_) {
+				full = false;
+			} else {
+				empty = false;
+			}
+		}
+
+		if (empty) {
+			break;
+		}
+
+		if (full) {
+			uint8_t _y = y;
+
+			for (; _y > 0; --_y) {
+				bool empty = true;
+
+				for (uint8_t _x = 0; _x < _width; ++_x) {
+					Tetromino::Type type = _get(_x, _y - 1);
+
+					_set(_x, _y, type);
+
+					if (type != Tetromino::Type::_) {
+						empty = false;
+					}
+				}
+
+				if (empty) {
+					break;
+				}
+			}
+
+			if (_y == 0) {
+				for (uint8_t _x = 0; _x < _width; ++_x) {
+					_set(_x, _y, Tetromino::Type::_);
+				}
+			}
+
+			++y;
+		}
+	}
+}
+
 void Pile::draw(tetDisplay display) {
-	for (int x = 0; x < _width; ++x) {
-		for (int y = 0; y < _height; ++y) {
+	for (uint8_t x = 0; x < _width; ++x) {
+		for (uint8_t y = 0; y < _height; ++y) {
 			Tetromino::Type type = _get(x, y);
 
 			if (type != Tetromino::Type::_) {
@@ -97,7 +148,7 @@ void Pile::draw(tetDisplay display) {
 	}
 }
 
-void Pile::clear() {
+void Pile::truncate() {
 	uint8_t empty = uint4_pack(Tetromino::Type::_, Tetromino::Type::_);
 
 	for (uint8_t i = 0, n = _memSize(); i < n; ++i) {
@@ -176,15 +227,18 @@ void Bag::shuffle() {
 }
 
 Tetris::Tetris(uint8_t _width,  uint8_t _height, unsigned int seed):
-	_width(_width), _height(_height), _lastDrop(0), _speed(500), _gameOver(true) {
+	_width(_width), _height(_height), _lastDrop(0), _speed(500), _gameOver(true),
+	_dropping(false), _clearBackground(true), _ghostEnabled(true) {
 
 	_tetromino = new Tetromino();
 	_pile = new Pile(_width, _height);
 	_bag = new Bag(seed);
+
+	setGhostColor(255, 255, 255);
 }
 
 void Tetris::reset() {
-	_pile->clear();
+	_pile->truncate();
 	_bag->shuffle();
 	_tetromino->spawn(_bag->pop());
 	_gameOver = false;
@@ -236,6 +290,24 @@ bool Tetris::rotateCounterClockWise() {
 	}
 }
 
+void Tetris::setDropping(bool dropping) {
+	_speed = dropping ? 50 : 500;
+}
+
+void Tetris::setClearBackground(bool clearBackground) {
+	_clearBackground = clearBackground;
+}
+
+void Tetris::setGhostEnabled(bool ghostEnabled) {
+	_ghostEnabled = ghostEnabled;
+}
+
+void Tetris::setGhostColor(uint8_t r, uint8_t g, uint8_t b) {
+	_ghostColor[0] = r;
+	_ghostColor[1] = g;
+	_ghostColor[2] = b;
+}
+
 void Tetris::update() {
 	if (_gameOver) {
 		return;
@@ -248,6 +320,8 @@ void Tetris::update() {
 
 		if (!_move(0, 1)) {
 			_pile->merge(_tetromino);
+			_pile->clearCompleteRows();
+
 			_tetromino->spawn(_bag->pop());
 
 			if (!_checkTetromino()) {
@@ -258,14 +332,28 @@ void Tetris::update() {
 }
 
 void Tetris::draw(tetDisplay display) {
-	for (uint8_t x = 0; x < _width; ++x) {
-		for (uint8_t y = 0; y < _height; ++y) {
-			display(x, y, 0, 0, 0);
+	if (_clearBackground) {
+		for (uint8_t x = 0; x < _width; ++x) {
+			for (uint8_t y = 0; y < _height; ++y) {
+				display(x, y, 0, 0, 0);
+			}
 		}
 	}
 
 	if (!_gameOver) {
-		_tetromino->draw(display);
+		if (_ghostEnabled) {
+			uint8_t x = _tetromino->x;
+			uint8_t y = _tetromino->y;
+
+			while (_move(0, 1));
+
+			_tetromino->draw(display, _ghostColor);
+
+			_tetromino->x = x;
+			_tetromino->y = y;
+		}
+
+		_tetromino->draw(display, NULL);
 	}
 
 	_pile->draw(display);

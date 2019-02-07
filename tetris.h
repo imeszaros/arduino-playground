@@ -32,7 +32,7 @@ public:
 		rot0, rotR, rot2, rotL
 	};
 
-	static const uint8_t* colorOf(Type type);
+	static uint8_t* colorOf(Type type);
 
 	Type type;
 	Rotation rotation;
@@ -43,14 +43,14 @@ public:
 	Tetromino();
 
 	// TODO what can be private??
-	const uint8_t* getColor();
+	uint8_t* getColor();
 	uint8_t getWidth();
 	uint8_t getHeight();
 	bool isMino(uint8_t idx);
 	uint8_t getSRSOffsetCount();
-	uint8_t getSRSOffset(Rotation rotation, int idx);
+	uint8_t getSRSOffset(Rotation rotation, uint8_t idx);
 	void spawn(Type type);
-	void draw(tetDisplay display);
+	void draw(tetDisplay display, uint8_t* color);
 
 private:
 
@@ -182,8 +182,9 @@ public:
 
 	bool isOccupied(uint8_t x, uint8_t y);
 	void merge(Tetromino* tetromino);
+	void clearCompleteRows();
 	void draw(tetDisplay display);
-	void clear();
+	void truncate();
 
 private:
 	uint8_t _width;
@@ -224,6 +225,10 @@ public:
 	bool moveRight();
 	bool rotateClockWise();
 	bool rotateCounterClockWise();
+	void setDropping(bool dropping);
+	void setClearBackground(bool clearBackground);
+	void setGhostEnabled(bool ghostEnabled);
+	void setGhostColor(uint8_t r, uint8_t g, uint8_t b);
 	void update();
 	void draw(tetDisplay display);
 
@@ -236,6 +241,10 @@ private:
 	unsigned long _lastDrop;
 	uint16_t _speed;
 	bool _gameOver;
+	bool _dropping;
+	bool _clearBackground;
+	bool _ghostEnabled;
+	uint8_t _ghostColor[3];
 
 	bool _checkTetromino();
 	bool _move(uint8_t x, uint8_t y);
