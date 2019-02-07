@@ -281,7 +281,7 @@ bool Tetris::_checkTetromino() {
 			int8_t y = minoY(_tetromino->y, w, i);
 
 			if (x < 0 || x >= _width || y >= _height
-					|| (x > 0 && y > 0 && _pile->isOccupied(x, y))) {
+					|| (y >= 0 && _pile->isOccupied(x, y))) {
 
 				return false;
 			}
