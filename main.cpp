@@ -14,7 +14,7 @@ Tray tray(PI_CLSD, PI_OPEN, M_ENABLE, M_CTRL_1, M_CTRL_2);
 pmf_player audio;
 
 // game engine
-Tetris tetris(LEDS_PER_ROW, NUM_LEDS / LEDS_PER_ROW, millis()); // TODO analogRead
+Tetris* tetris;
 
 // buttons
 Bounce resetButton = Bounce();
@@ -82,7 +82,9 @@ void setup() {
     tray.init();
 
     // initialize tetris
-    tetris.reset();
+    Entropy.initialize();
+    tetris = new Tetris(LEDS_PER_ROW, NUM_LEDS / LEDS_PER_ROW, Entropy.random());
+    tetris->reset();
 }
 
 void loop() {
@@ -118,48 +120,48 @@ void loop() {
 	}
 
 	if (resetButton.rose()) {
-		tetris.reset();
+		tetris->reset();
 		playButtonPressSound();
 		playButtonPressVibra();
 	}
 
 	if (rotateButton.rose()) {
-		tetris.rotateClockWise();
+		tetris->rotateClockWise();
 		playButtonPressSound();
 		playButtonPressVibra();
 	}
 
 	if (leftButton.rose()) {
 		buttonRepeat(true);
-		tetris.moveLeft();
+		tetris->moveLeft();
 		playButtonPressSound();
 		playButtonPressVibra();
 	} else if (leftButton.read() && buttonRepeat(false)) {
-		tetris.moveLeft();
+		tetris->moveLeft();
 	}
 
 	if (rightButton.rose()) {
 		buttonRepeat(true);
-		tetris.moveRight();
+		tetris->moveRight();
 		playButtonPressSound();
 		playButtonPressVibra();
 	} else if (rightButton.read() && buttonRepeat(false)) {
-		tetris.moveRight();
+		tetris->moveRight();
 	}
 
 	if (downButton.rose()) {
 		buttonRepeat(true);
-		tetris.moveDown();
+		tetris->moveDown();
 		playButtonPressSound();
 		playButtonPressVibra();
 	} else if (downButton.read() && buttonRepeat(false)) {
-		tetris.moveDown();
+		tetris->moveDown();
 	}
 
-	tetris.update();
+	tetris->update();
 
     if (displayTimer.fire()) {
-    	tetris.draw(&setLedColor);
+    	tetris->draw(&setLedColor);
     	FastLED.show();
     }
 

@@ -35,9 +35,12 @@
 // game engine
 #include "tetris.h"
 
+// random seed
+#include "entropy.h"
+
 // pin configuration
-#define LED_SDI     11
-#define LED_SCK     12
+#define LED_SDI    11
+#define LED_SCK    12
 
 #define BTN_SOUND  28
 #define BTN_MUSIC  29
