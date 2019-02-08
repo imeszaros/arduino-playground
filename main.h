@@ -10,7 +10,8 @@
 #define LEDS_PER_ROW    10
 #define LED_TYPE        SK9822
 #define COLOR_ORDER     BGR
-#define LED_FPS         100
+#define LED_FPS         60
+#define BRIGHTNESS		30
 #include <FastLED.h>
 
 // audio

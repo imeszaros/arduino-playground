@@ -1,5 +1,7 @@
-#include <FastLED.h>
+#include <stdlib.h>
 #include <inttypes.h>
+#include "graphics.h"
+#include "timer.h"
 
 #define TETROMINO_COUNT 7
 
@@ -42,7 +44,6 @@ public:
 
 	Tetromino();
 
-	// TODO what can be private??
 	uint8_t* getColor();
 	uint8_t getWidth();
 	uint8_t getHeight();
@@ -88,7 +89,7 @@ private:
 
 	static constexpr _Data _data[] {
 		{ // I
-			{ 0, 255, 255 },
+			{ 0, 255, 160 },
 			uint4_pack(5, 5),
 			uint4_pack(2, 3),
 			{
@@ -112,7 +113,7 @@ private:
 			0
 		},
 		{ // L
-			{ 255, 170, 0 },
+			{ 255, 114, 0 },
 			uint4_pack(3, 3),
 			uint4_pack(3, 2),
 			{
@@ -228,7 +229,6 @@ public:
 	bool rotateCounterClockWise();
 	void setClearBackground(bool clearBackground);
 	void setGhostEnabled(bool ghostEnabled);
-	void setGhostColor(uint8_t r, uint8_t g, uint8_t b);
 	void update();
 	void draw(tetDisplay display);
 
@@ -238,14 +238,14 @@ private:
 	Tetromino* _tetromino;
 	Pile* _pile;
 	Bag* _bag;
-	unsigned long _lastDrop;
 	uint16_t _rowsCompleted;
-	uint16_t _speed;
 	uint8_t _level;
 	bool _gameOver;
 	bool _clearBackground;
 	bool _ghostEnabled;
-	uint8_t _ghostColor[3];
+
+	Timer* _updateTimer;
+	Timer* _ghostTimer;
 
 	bool _checkTetromino();
 	bool _move(uint8_t x, uint8_t y);

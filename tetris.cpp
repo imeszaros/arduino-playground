@@ -233,15 +233,16 @@ void Bag::shuffle() {
 }
 
 Tetris::Tetris(uint8_t _width,  uint8_t _height, unsigned int seed):
-	_width(_width), _height(_height), _lastDrop(0),
-	_rowsCompleted(0), _speed(500), _level(1), _gameOver(true),
+	_width(_width), _height(_height),
+	_rowsCompleted(0), _level(1), _gameOver(true),
 	_clearBackground(true), _ghostEnabled(true) {
 
 	_tetromino = new Tetromino();
 	_pile = new Pile(_width, _height);
 	_bag = new Bag(seed);
 
-	setGhostColor(255, 255, 255);
+	_updateTimer = new Timer(500);
+	_ghostTimer = new Timer(1000);
 }
 
 void Tetris::reset() {
@@ -311,22 +312,12 @@ void Tetris::setGhostEnabled(bool ghostEnabled) {
 	_ghostEnabled = ghostEnabled;
 }
 
-void Tetris::setGhostColor(uint8_t r, uint8_t g, uint8_t b) {
-	_ghostColor[0] = r;
-	_ghostColor[1] = g;
-	_ghostColor[2] = b;
-}
-
 void Tetris::update() {
 	if (_gameOver) {
 		return;
 	}
 
-	unsigned long now = millis();
-
-	if (now - _lastDrop > _speed) {
-		_lastDrop = now;
-
+	if (_updateTimer->fire()) {
 		if (!_move(0, 1)) {
 			_pile->merge(_tetromino);
 			_rowsCompleted += _pile->clearCompleteRows();
@@ -358,7 +349,14 @@ void Tetris::draw(tetDisplay display) {
 
 			while (_move(0, 1));
 
-			_tetromino->draw(display, _ghostColor);
+			uint8_t ghostColor[3];
+			uint8_t* minoColor = Tetromino::colorOf(_tetromino->type);
+
+			pulsateColor(255, 255, 255,
+					minoColor[0], minoColor[1], minoColor[2],
+					_ghostTimer->progress(true), ghostColor);
+
+			_tetromino->draw(display, ghostColor);
 
 			_tetromino->x = x;
 			_tetromino->y = y;
@@ -447,5 +445,5 @@ void Tetris::_setDifficulty() {
 		_level = 10;
 	}
 
-	_speed = (11 - _level) * 50;
+	_updateTimer->reset((11 - _level) * 50);
 }

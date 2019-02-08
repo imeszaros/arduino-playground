@@ -2,7 +2,7 @@
 
 // display
 CRGB leds[NUM_LEDS];
-unsigned long lastLedUpdate = millis();
+Timer displayTimer(LED_FPS);
 
 // vibra-motor
 Adafruit_DRV2605 vibra;
@@ -24,8 +24,7 @@ Bounce rotateButton = Bounce();
 Bounce leftButton = Bounce();
 Bounce rightButton = Bounce();
 Bounce downButton = Bounce();
-
-unsigned long lastButtonRepeat;
+Timer buttonTimer(REPEAT_INTERVAL);
 
 // music enabled
 byte music = true;
@@ -39,7 +38,7 @@ byte trayState = 0;
 void setup() {
 	// power-up safety delay
     delay(500);
-    //Serial.begin(7680);
+    // TODO remove Serial.begin(7680);
 
     // initialize buttons
 	resetButton.attach(BTN_RESET, INPUT);
@@ -71,9 +70,8 @@ void setup() {
 	playGameMusic();
 
 	// initialize display
-    FastLED.addLeds<LED_TYPE, LED_SDI, LED_SCK, COLOR_ORDER, DATA_RATE_MHZ(20)>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-    //FastLED.setMaxPowerInVoltsAndMilliamps(5, 100); // TODO
-    FastLED.setBrightness(5); // TODO
+    FastLED.addLeds<LED_TYPE, LED_SDI, LED_SCK, COLOR_ORDER, DATA_RATE_MHZ(20)>(leds, NUM_LEDS).setCorrection(UncorrectedColor);
+    FastLED.setBrightness(BRIGHTNESS);
 
     // initialize vibra-motor
     vibra.begin();
@@ -158,9 +156,10 @@ void loop() {
 		tetris.moveDown();
 	}
 
-    unsigned long now = millis();
-    if (lastLedUpdate - now > 100) {
-    	lastLedUpdate = now;
+	tetris.update();
+
+    if (displayTimer.fire()) {
+    	tetris.draw(&setLedColor);
     	FastLED.show();
     }
 
@@ -178,9 +177,6 @@ void loop() {
 	}
 
 	tray.update();
-
-	tetris.update();
-	tetris.draw(&setLedColor);
 }
 
 void playMusic(const void *track) {
@@ -219,17 +215,14 @@ void setLedColor(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b) {
 }
 
 bool buttonRepeat(bool reset) {
-	unsigned long now = millis();
-
 	if (reset) {
-		lastButtonRepeat = now + REPEAT_DELAY - REPEAT_INTERVAL;
+		buttonTimer.setOrigin(millis() + REPEAT_DELAY - REPEAT_INTERVAL);
 		return false;
 	}
 
-	if (now > lastButtonRepeat && now - lastButtonRepeat > REPEAT_INTERVAL) {
-		lastButtonRepeat = now;
-		return true;
-	} else {
-		return false;
-	}
+	return buttonTimer.fire();
+}
+
+unsigned long Timer::_millis() {
+	return millis();
 }
