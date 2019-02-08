@@ -42,13 +42,15 @@
 #define LED_SDI    11
 #define LED_SCK    12
 
-#define BTN_SOUND  28
-#define BTN_MUSIC  29
-#define BTN_RESET  30
-#define BTN_ROTATE 31
-#define BTN_LEFT   23
-#define BTN_RIGHT  22
-#define BTN_DOWN   21
+#define BTN_PAUSE        27
+#define BTN_SOUND        28
+#define BTN_MUSIC        29
+#define BTN_RESET        30
+#define BTN_ROTATE_LEFT  31
+#define BTN_ROTATE_RIGHT 20
+#define BTN_LEFT         23
+#define BTN_RIGHT        22
+#define BTN_DOWN         21
 
 #define PI_CLSD 13
 #define PI_OPEN 14
@@ -74,5 +76,6 @@ void playButtonPressSound();
 void playButtonPressVibra();
 void setLedColor(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b);
 bool buttonRepeat(bool reset);
+void showPauseSign();
 
 #endif

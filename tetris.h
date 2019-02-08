@@ -220,7 +220,9 @@ public:
 	Tetris(uint8_t width,  uint8_t height, unsigned int seed);
 
 	void reset();
-	bool isGameOver();
+	bool isGameOver();;
+	bool isPaused();
+	void setPaused(bool paused);
 	Tetromino::Type preview();
 	bool moveLeft();
 	bool moveRight();
@@ -241,6 +243,7 @@ private:
 	uint16_t _rowsCompleted;
 	uint8_t _level;
 	bool _gameOver;
+	bool _paused;
 	bool _clearBackground;
 	bool _ghostEnabled;
 

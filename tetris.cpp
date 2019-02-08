@@ -234,7 +234,7 @@ void Bag::shuffle() {
 
 Tetris::Tetris(uint8_t _width,  uint8_t _height, unsigned int seed):
 	_width(_width), _height(_height),
-	_rowsCompleted(0), _level(1), _gameOver(true),
+	_rowsCompleted(0), _level(1), _gameOver(true), _paused(false),
 	_clearBackground(true), _ghostEnabled(true) {
 
 	_tetromino = new Tetromino();
@@ -251,6 +251,7 @@ void Tetris::reset() {
 	_tetromino->spawn(_bag->pop());
 	_rowsCompleted = 0;
 	_setDifficulty();
+	_paused = false;
 	_gameOver = false;
 }
 
@@ -258,23 +259,47 @@ bool Tetris::isGameOver() {
 	return _gameOver;
 }
 
+bool Tetris::isPaused() {
+	return _paused;
+}
+
+void Tetris::setPaused(bool paused) {
+	_paused = paused;
+}
+
 Tetromino::Type Tetris::preview() {
 	return _bag->peek();
 }
 
 bool Tetris::moveLeft() {
+	if (isPaused()) {
+		return false;
+	}
+
 	return _move(-1, 0);
 }
 
 bool Tetris::moveRight() {
+	if (isPaused()) {
+		return false;
+	}
+
 	return _move(1, 0);
 }
 
 bool Tetris::moveDown() {
+	if (isPaused()) {
+		return false;
+	}
+
 	return _move(0, 1);
 }
 
 bool Tetris::rotateClockWise() {
+	if (isPaused()) {
+		return false;
+	}
+
 	switch (_tetromino->rotation) {
 	case Tetromino::Rotation::rot0:
 		return _rotate(Tetromino::Rotation::rotR);
@@ -290,6 +315,10 @@ bool Tetris::rotateClockWise() {
 }
 
 bool Tetris::rotateCounterClockWise() {
+	if (isPaused()) {
+		return false;
+	}
+
 	switch (_tetromino->rotation) {
 	case Tetromino::Rotation::rot0:
 		return _rotate(Tetromino::Rotation::rotL);
@@ -313,7 +342,7 @@ void Tetris::setGhostEnabled(bool ghostEnabled) {
 }
 
 void Tetris::update() {
-	if (_gameOver) {
+	if (_gameOver || _paused) {
 		return;
 	}
 

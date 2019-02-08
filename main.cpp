@@ -17,10 +17,12 @@ pmf_player audio;
 Tetris* tetris;
 
 // buttons
+Bounce pauseButton = Bounce();
 Bounce resetButton = Bounce();
 Bounce musicButton = Bounce();
 Bounce soundButton = Bounce();
-Bounce rotateButton = Bounce();
+Bounce rotateLeftButton = Bounce();
+Bounce rotateRightButton = Bounce();
 Bounce leftButton = Bounce();
 Bounce rightButton = Bounce();
 Bounce downButton = Bounce();
@@ -32,6 +34,9 @@ byte music = true;
 // sound enabled
 byte sound = true;
 
+// timers for effects
+Timer pauseSignTimer(5000);
+
 // TODO remove
 byte trayState = 0;
 
@@ -41,6 +46,9 @@ void setup() {
     // TODO remove Serial.begin(7680);
 
     // initialize buttons
+    pauseButton.attach(BTN_PAUSE, INPUT);
+    pauseButton.interval(5);
+
 	resetButton.attach(BTN_RESET, INPUT);
 	resetButton.interval(5);
 
@@ -50,8 +58,11 @@ void setup() {
 	soundButton.attach(BTN_SOUND, INPUT);
 	soundButton.interval(5);
 
-	rotateButton.attach(BTN_ROTATE, INPUT);
-	rotateButton.interval(5);
+	rotateLeftButton.attach(BTN_ROTATE_LEFT, INPUT);
+	rotateLeftButton.interval(5);
+
+	rotateRightButton.attach(BTN_ROTATE_RIGHT, INPUT);
+	rotateRightButton.interval(5);
 
 	leftButton.attach(BTN_LEFT, INPUT);
 	leftButton.interval(5);
@@ -88,16 +99,30 @@ void setup() {
 }
 
 void loop() {
+	pauseButton.update();
 	resetButton.update();
 	musicButton.update();
 	soundButton.update();
-	rotateButton.update();
+	rotateLeftButton.update();
+	rotateRightButton.update();
 	leftButton.update();
 	rightButton.update();
 	downButton.update();
 
 	if (music) {
 		audio.update();
+	}
+
+	if (pauseButton.rose()) {
+		tetris->setPaused(!tetris->isPaused());
+		playButtonPressSound();
+		playButtonPressVibra();
+	}
+
+	if (resetButton.rose()) {
+		tetris->reset();
+		playButtonPressSound();
+		playButtonPressVibra();
 	}
 
 	if (soundButton.rose()) {
@@ -119,13 +144,13 @@ void loop() {
 		EEPROM.put(EE_ADDR_MUSIC, music);
 	}
 
-	if (resetButton.rose()) {
-		tetris->reset();
+	if (rotateLeftButton.rose()) {
+		tetris->rotateCounterClockWise();
 		playButtonPressSound();
 		playButtonPressVibra();
 	}
 
-	if (rotateButton.rose()) {
+	if (rotateRightButton.rose()) {
 		tetris->rotateClockWise();
 		playButtonPressSound();
 		playButtonPressVibra();
@@ -162,6 +187,13 @@ void loop() {
 
     if (displayTimer.fire()) {
     	tetris->draw(&setLedColor);
+
+    	if (tetris->isPaused()) {
+    		showPauseSign();
+    	} else if (tetris->isGameOver()) {
+    		// TODO
+    	}
+
     	FastLED.show();
     }
 
@@ -223,6 +255,29 @@ bool buttonRepeat(bool reset) {
 	}
 
 	return buttonTimer.fire();
+}
+
+void showPauseSign() {
+	uint8_t hue = pauseSignTimer.progress(true) * 255;
+
+	for (uint8_t i = 61; i < 69; ++i) {
+		leds[i] = CRGB::Black;
+	}
+
+	for (uint8_t i = 70; i < 130; i+=10) {
+		leds[i + 1] = CRGB::Black;
+		leds[i + 2].setHSV(hue, 255, 255);
+		leds[i + 3].setHSV(hue, 255, 255);
+		leds[i + 4] = CRGB::Black;
+		leds[i + 5] = CRGB::Black;
+		leds[i + 6].setHSV(hue, 255, 255);
+		leds[i + 7].setHSV(hue, 255, 255);
+		leds[i + 8] = CRGB::Black;
+	}
+
+	for (uint8_t i = 131; i < 139; ++i) {
+		leds[i] = CRGB::Black;
+	}
 }
 
 unsigned long Timer::_millis() {
