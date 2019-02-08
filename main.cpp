@@ -94,7 +94,7 @@ void setup() {
 
     // initialize tetris
     Entropy.initialize();
-    tetris = new Tetris(LEDS_PER_ROW, NUM_LEDS / LEDS_PER_ROW, Entropy.random());
+    tetris = new Tetris(LEDS_PER_ROW, NUM_LEDS / LEDS_PER_ROW, Entropy.random(), &tetrisEvent);
     tetris->reset();
 }
 
@@ -114,52 +114,77 @@ void loop() {
 	}
 
 	if (pauseButton.rose()) {
-		tetris->setPaused(!tetris->isPaused());
-		playButtonPressSound();
+		if (tetris->isPaused()) {
+			playBeepUpSound();
+			tetris->setPaused(false);
+		} else {
+			playBeepDownSound();
+			tetris->setPaused(true);
+		}
+
 		playButtonPressVibra();
 	}
 
 	if (resetButton.rose()) {
 		tetris->reset();
-		playButtonPressSound();
+
+		playBeepUpSound();
 		playButtonPressVibra();
 	}
 
 	if (soundButton.rose()) {
 		sound = !sound;
-		playButtonPressSound();
+
+		playBeepUpSound();
 		playButtonPressVibra();
+
 		EEPROM.put(EE_ADDR_SOUND, sound);
 	}
 
 	if (musicButton.rose()) {
 		music = !music;
+
 		if (music) {
 			playGameMusic();
 		} else {
 			stopMusic();
 		}
-		playButtonPressSound();
+
+		playBeepUpSound();
 		playButtonPressVibra();
+
 		EEPROM.put(EE_ADDR_MUSIC, music);
 	}
 
 	if (rotateLeftButton.rose()) {
-		tetris->rotateCounterClockWise();
-		playButtonPressSound();
+		if (tetris->rotateCounterClockWise()) {
+			playBeepUpSound();
+		} else {
+			playBeepDownSound();
+		}
+
 		playButtonPressVibra();
 	}
 
 	if (rotateRightButton.rose()) {
-		tetris->rotateClockWise();
-		playButtonPressSound();
+		if (tetris->rotateClockWise()) {
+			playBeepUpSound();
+		} else {
+			playBeepDownSound();
+		}
+
 		playButtonPressVibra();
 	}
 
 	if (leftButton.rose()) {
 		buttonRepeat(true);
-		tetris->moveLeft();
-		playButtonPressSound();
+
+		if (tetris->moveLeft()) {
+			playBeepUpSound();
+		} else {
+			playBeepDownSound();
+		}
+
 		playButtonPressVibra();
 	} else if (leftButton.read() && buttonRepeat(false)) {
 		tetris->moveLeft();
@@ -167,8 +192,13 @@ void loop() {
 
 	if (rightButton.rose()) {
 		buttonRepeat(true);
-		tetris->moveRight();
-		playButtonPressSound();
+
+		if (tetris->moveRight()) {
+			playBeepUpSound();
+		} else {
+			playBeepDownSound();
+		}
+
 		playButtonPressVibra();
 	} else if (rightButton.read() && buttonRepeat(false)) {
 		tetris->moveRight();
@@ -176,8 +206,13 @@ void loop() {
 
 	if (downButton.rose()) {
 		buttonRepeat(true);
-		tetris->moveDown();
-		playButtonPressSound();
+
+		if (tetris->moveDown()) {
+			playBeepUpSound();
+		} else {
+			playBeepDownSound();
+		}
+
 		playButtonPressVibra();
 	} else if (downButton.read() && buttonRepeat(false)) {
 		tetris->moveDown();
@@ -191,7 +226,7 @@ void loop() {
     	if (tetris->isPaused()) {
     		showPauseSign();
     	} else if (tetris->isGameOver()) {
-    		// TODO
+    		// TODO anim and vibra
     	}
 
     	FastLED.show();
@@ -227,10 +262,17 @@ void playGameMusic() {
 	playMusic(gameMusic);
 }
 
-void playButtonPressSound() {
+void playBeepUpSound() {
 	if (sound) {
-		const uint16_t size = sizeof(buttonSound) / sizeof(buttonSound[0]);
-		audio.mixin(buttonSound, size);
+		const uint16_t size = sizeof(beepUp) / sizeof(beepUp[0]);
+		audio.mixin(beepUp, size);
+	}
+}
+
+void playBeepDownSound() {
+	if (sound) {
+		const uint16_t size = sizeof(beepDown) / sizeof(beepDown[0]);
+		audio.mixin(beepDown, size);
 	}
 }
 
@@ -240,12 +282,82 @@ void playButtonPressVibra() {
 	vibra.go();
 }
 
+void playSingleLineClearVibra() {
+	vibra.setWaveform(0, 7);
+	vibra.setWaveform(1, 0);
+	vibra.go();
+}
+
+void playDoubleLineClearVibra() {
+	vibra.setWaveform(0, 7);
+	vibra.setWaveform(1, 7);
+	vibra.setWaveform(2, 0);
+	vibra.go();
+}
+
+void playTripleLineClearVibra() {
+	vibra.setWaveform(0, 7);
+	vibra.setWaveform(1, 7);
+	vibra.setWaveform(2, 7);
+	vibra.setWaveform(3, 0);
+	vibra.go();
+}
+
+void playTetrisVibra() {
+	vibra.setWaveform(0, 52);
+	vibra.setWaveform(1, 52);
+	vibra.setWaveform(2, 52);
+	vibra.setWaveform(3, 52);
+	vibra.setWaveform(4, 0);
+	vibra.go();
+}
+
+void playLevelUpVibra() {
+	vibra.setWaveform(0, 89);
+	vibra.setWaveform(1, 89);
+	vibra.setWaveform(2, 89);
+	vibra.setWaveform(3, 0);
+	vibra.go();
+}
+
 void setLedColor(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b) {
 	if (x < 0 || x >= LEDS_PER_ROW || y < 0 || y >= (NUM_LEDS / LEDS_PER_ROW)) {
 		return;
 	}
 
 	leds[y * LEDS_PER_ROW + (y % 2 == 0 ? x : LEDS_PER_ROW - x - 1)].setRGB(r, g, b);
+}
+
+void tetrisEvent(TetrisEvent event, uint8_t data) {
+	switch (event) {
+	case TetrisEvent::LevelUp:
+		playLevelUpVibra();
+		// TODO anim
+		break;
+	case TetrisEvent::LinesCompleted:
+		switch (data) {
+		case 1:
+			playSingleLineClearVibra();
+			break;
+		case 2:
+			playDoubleLineClearVibra();
+			// TODO anim
+			break;
+		case 3:
+			playTripleLineClearVibra();
+			// TODO anim
+			break;
+		case 4:
+			playTetrisVibra();
+			// TODO anim
+			break;
+		default:
+			;
+		}
+		break;
+	default:
+		;
+	}
 }
 
 bool buttonRepeat(bool reset) {

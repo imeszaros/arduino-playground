@@ -72,9 +72,11 @@
 void playMusic(const void *track);
 void stopMusic();
 void playGameMusic();
-void playButtonPressSound();
+void playBeepUpSound();
+void playBeepDownSound();
 void playButtonPressVibra();
 void setLedColor(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b);
+void tetrisEvent(TetrisEvent event, uint8_t data);
 bool buttonRepeat(bool reset);
 void showPauseSign();
 

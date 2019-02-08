@@ -48,7 +48,7 @@ void Tetromino::spawn(Tetromino::Type type) {
 	y = -uint4_right(_data[type].spawnCoords);
 }
 
-void Tetromino::draw(tetDisplay display, uint8_t* color) {
+void Tetromino::draw(tetrisDisplay display, uint8_t* color) {
 	if (color == NULL) {
 		color = getColor();
 	}
@@ -141,14 +141,24 @@ uint8_t Pile::clearCompleteRows() {
 	return rowsCompleted;
 }
 
-void Pile::draw(tetDisplay display) {
-	for (uint8_t x = 0; x < _width; ++x) {
-		for (uint8_t y = 0; y < _height; ++y) {
+void Pile::draw(tetrisDisplay display) {
+	for (uint8_t y = 0; y < _height; ++y) {
+		bool full = true;
+
+		for (uint8_t x = 0; x < _width; ++x) {
 			Tetromino::Type type = _get(x, y);
 
-			if (type != Tetromino::Type::_) {
+			if (type == Tetromino::Type::_) {
+				full = false;
+			} else {
 				const uint8_t* color = Tetromino::colorOf(type);
 				display(x, y, color[0], color[1], color[2]);
+			}
+		}
+
+		if (full) {
+			for (uint8_t x = 0; x < _width; ++x) {
+				display(x, y, 255, 255, 255);
 			}
 		}
 	}
@@ -232,9 +242,9 @@ void Bag::shuffle() {
 	_index = 0;
 }
 
-Tetris::Tetris(uint8_t _width,  uint8_t _height, unsigned int seed):
-	_width(_width), _height(_height),
-	_rowsCompleted(0), _level(1), _gameOver(true), _paused(false),
+Tetris::Tetris(uint8_t _width,  uint8_t _height, unsigned int seed, tetrisListener _listener):
+	_width(_width), _height(_height), _listener(_listener),
+	 _scores(0), _rowsCompleted(0), _level(1), _gameOver(true), _paused(false),
 	_clearBackground(true), _ghostEnabled(true) {
 
 	_tetromino = new Tetromino();
@@ -249,6 +259,7 @@ void Tetris::reset() {
 	_pile->truncate();
 	_bag->shuffle();
 	_tetromino->spawn(_bag->pop());
+	_scores = 0;
 	_rowsCompleted = 0;
 	_setDifficulty();
 	_paused = false;
@@ -265,6 +276,10 @@ bool Tetris::isPaused() {
 
 void Tetris::setPaused(bool paused) {
 	_paused = paused;
+}
+
+uint32_t Tetris::getScores() {
+	return _scores;
 }
 
 Tetromino::Type Tetris::preview() {
@@ -349,7 +364,27 @@ void Tetris::update() {
 	if (_updateTimer->fire()) {
 		if (!_move(0, 1)) {
 			_pile->merge(_tetromino);
-			_rowsCompleted += _pile->clearCompleteRows();
+
+			uint8_t rowsCleared = _pile->clearCompleteRows();
+
+			switch (rowsCleared) {
+			case 1:
+				_scores += 40;
+				break;
+			case 2:
+				_scores += 100;
+				break;
+			case 3:
+				_scores += 300;
+				break;
+			case 4:
+				_scores += 1200;
+				break;
+			default:
+				;
+			}
+
+			_rowsCompleted += rowsCleared;
 
 			_setDifficulty();
 
@@ -362,7 +397,7 @@ void Tetris::update() {
 	}
 }
 
-void Tetris::draw(tetDisplay display) {
+void Tetris::draw(tetrisDisplay display) {
 	if (_clearBackground) {
 		for (uint8_t x = 0; x < _width; ++x) {
 			for (uint8_t y = 0; y < _height; ++y) {
@@ -417,9 +452,9 @@ bool Tetris::_checkTetromino() {
 	return true;
 }
 
-bool Tetris::_move(uint8_t x, uint8_t y) {
-	uint8_t oldX = _tetromino->x;
-	uint8_t oldY = _tetromino->y;
+bool Tetris::_move(int8_t x, int8_t y) {
+	int8_t oldX = _tetromino->x;
+	int8_t oldY = _tetromino->y;
 
 	_tetromino->x += x;
 	_tetromino->y += y;

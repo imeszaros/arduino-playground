@@ -20,7 +20,12 @@
 #define minoX(tetrominoX, tetrominoWidth, minoIdx) (tetrominoX + minoIdx % tetrominoWidth)
 #define minoY(tetrominoY, tetrominoWidth, minoIdx) (tetrominoY + minoIdx / tetrominoWidth)
 
-typedef void (*tetDisplay) (int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b);
+enum TetrisEvent {
+	LevelUp, LinesCompleted, GameOver
+};
+
+typedef void (*tetrisDisplay) (int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b);
+typedef void (*tetrisListener) (TetrisEvent event, uint8_t data);
 
 class Tetromino {
 
@@ -51,7 +56,7 @@ public:
 	uint8_t getSRSOffsetCount();
 	uint8_t getSRSOffset(Rotation rotation, uint8_t idx);
 	void spawn(Type type);
-	void draw(tetDisplay display, uint8_t* color);
+	void draw(tetrisDisplay display, uint8_t* color);
 
 private:
 
@@ -179,15 +184,17 @@ private:
 class Pile {
 
 public:
+
 	Pile(uint8_t width, uint8_t height);
 
 	bool isOccupied(uint8_t x, uint8_t y);
 	void merge(Tetromino* tetromino);
 	uint8_t clearCompleteRows();
-	void draw(tetDisplay display);
+	void draw(tetrisDisplay display);
 	void truncate();
 
 private:
+
 	uint8_t _width;
 	uint8_t _height;
 	uint8_t* _data;
@@ -210,6 +217,7 @@ public:
 	void shuffle();
 
 private:
+
 	Tetromino::Type _sequence[TETROMINO_COUNT];
 	uint8_t _index;
 };
@@ -217,12 +225,14 @@ private:
 class Tetris {
 
 public:
-	Tetris(uint8_t width,  uint8_t height, unsigned int seed);
+
+	Tetris(uint8_t width,  uint8_t height, unsigned int seed, tetrisListener _listener);
 
 	void reset();
-	bool isGameOver();;
+	bool isGameOver();
 	bool isPaused();
 	void setPaused(bool paused);
+	uint32_t getScores();
 	Tetromino::Type preview();
 	bool moveLeft();
 	bool moveRight();
@@ -232,14 +242,17 @@ public:
 	void setClearBackground(bool clearBackground);
 	void setGhostEnabled(bool ghostEnabled);
 	void update();
-	void draw(tetDisplay display);
+	void draw(tetrisDisplay display);
 
 private:
+
 	uint8_t _width;
 	uint8_t _height;
+	tetrisListener _listener;
 	Tetromino* _tetromino;
 	Pile* _pile;
 	Bag* _bag;
+	uint32_t _scores;
 	uint16_t _rowsCompleted;
 	uint8_t _level;
 	bool _gameOver;
@@ -251,7 +264,7 @@ private:
 	Timer* _ghostTimer;
 
 	bool _checkTetromino();
-	bool _move(uint8_t x, uint8_t y);
+	bool _move(int8_t x, int8_t y);
 	bool _rotate(Tetromino::Rotation to);
 	void _setDifficulty();
 };
