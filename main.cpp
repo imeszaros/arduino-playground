@@ -35,10 +35,16 @@ byte music = true;
 byte sound = true;
 
 // timers for effects
-Timer pauseSignTimer(5000);
+Timer rainbowTimer(5000);
+
+// game state
+uint8_t state = STATE_CATRIS_LOOP;
 
 // TODO remove
 byte trayState = 0;
+
+// catris
+Catris catris(&progMemRead, &progMemRead);
 
 void setup() {
 	// power-up safety delay
@@ -92,6 +98,10 @@ void setup() {
     // initialize tray control
     tray.init();
 
+    // initialize catris
+    catris.setAnimation(Catris::Anim::Happy);
+    catris.setText("    *purr-purr* Hello 2sofix! I am Catris. Ready to play? Press -> to begin.");
+
     // initialize tetris
     Entropy.initialize();
     tetris = new Tetris(LEDS_PER_ROW, NUM_LEDS / LEDS_PER_ROW, Entropy.random(), &tetrisEvent);
@@ -111,25 +121,6 @@ void loop() {
 
 	if (music) {
 		audio.update();
-	}
-
-	if (pauseButton.rose()) {
-		if (tetris->isPaused()) {
-			playBeepUpSound();
-			tetris->setPaused(false);
-		} else {
-			playBeepDownSound();
-			tetris->setPaused(true);
-		}
-
-		playButtonPressVibra();
-	}
-
-	if (resetButton.rose()) {
-		tetris->reset();
-
-		playBeepUpSound();
-		playButtonPressVibra();
 	}
 
 	if (soundButton.rose()) {
@@ -156,81 +147,121 @@ void loop() {
 		EEPROM.put(EE_ADDR_MUSIC, music);
 	}
 
-	if (rotateLeftButton.rose()) {
-		if (tetris->rotateCounterClockWise()) {
+	if (state == STATE_CATRIS_LOOP || state == STATE_CATRIS_ONCE) {
+		if (rightButton.rose()) {
+			buttonRepeat(true);
+			state = STATE_TETRIS;
 			playBeepUpSound();
-		} else {
-			playBeepDownSound();
+			playButtonPressVibra();
 		}
 
-		playButtonPressVibra();
-	}
-
-	if (rotateRightButton.rose()) {
-		if (tetris->rotateClockWise()) {
-			playBeepUpSound();
-		} else {
-			playBeepDownSound();
+		bool finished = catris.update();
+		if (state == STATE_CATRIS_ONCE && finished) {
+			state = STATE_TETRIS;
 		}
 
-		playButtonPressVibra();
-	}
+		catris.update();
 
-	if (leftButton.rose()) {
-		buttonRepeat(true);
+	    if (displayTimer.fire()) {
+	    	catris.draw(&setLedColor);
+	    	FastLED.show();
+	    }
+	} else if (state == STATE_TETRIS) {
+		if (pauseButton.rose()) {
+			if (tetris->isPaused()) {
+				playBeepUpSound();
+				tetris->setPaused(false);
+			} else {
+				playBeepDownSound();
+				tetris->setPaused(true);
+			}
 
-		if (tetris->moveLeft()) {
-			playBeepUpSound();
-		} else {
-			playBeepDownSound();
+			playButtonPressVibra();
 		}
 
-		playButtonPressVibra();
-	} else if (leftButton.read() && buttonRepeat(false)) {
-		tetris->moveLeft();
-	}
+		if (resetButton.rose()) {
+			tetris->reset();
 
-	if (rightButton.rose()) {
-		buttonRepeat(true);
-
-		if (tetris->moveRight()) {
 			playBeepUpSound();
-		} else {
-			playBeepDownSound();
+			playButtonPressVibra();
 		}
 
-		playButtonPressVibra();
-	} else if (rightButton.read() && buttonRepeat(false)) {
-		tetris->moveRight();
-	}
+		if (rotateLeftButton.rose()) {
+			if (tetris->rotateCounterClockWise()) {
+				playBeepUpSound();
+			} else {
+				playBeepDownSound();
+			}
 
-	if (downButton.rose()) {
-		buttonRepeat(true);
-
-		if (tetris->moveDown()) {
-			playBeepUpSound();
-		} else {
-			playBeepDownSound();
+			playButtonPressVibra();
 		}
 
-		playButtonPressVibra();
-	} else if (downButton.read() && buttonRepeat(false)) {
-		tetris->moveDown();
+		if (rotateRightButton.rose()) {
+			if (tetris->rotateClockWise()) {
+				playBeepUpSound();
+			} else {
+				playBeepDownSound();
+			}
+
+			playButtonPressVibra();
+		}
+
+		if (leftButton.rose()) {
+			buttonRepeat(true);
+
+			if (tetris->moveLeft()) {
+				playBeepUpSound();
+			} else {
+				playBeepDownSound();
+			}
+
+			playButtonPressVibra();
+		} else if (leftButton.read() && buttonRepeat(false)) {
+			tetris->moveLeft();
+		}
+
+		if (rightButton.rose()) {
+			buttonRepeat(true);
+
+			if (tetris->moveRight()) {
+				playBeepUpSound();
+			} else {
+				playBeepDownSound();
+			}
+
+			playButtonPressVibra();
+		} else if (rightButton.read() && buttonRepeat(false)) {
+			tetris->moveRight();
+		}
+
+		if (downButton.rose()) {
+			buttonRepeat(true);
+
+			if (tetris->moveDown()) {
+				playBeepUpSound();
+			} else {
+				playBeepDownSound();
+			}
+
+			playButtonPressVibra();
+		} else if (downButton.read() && buttonRepeat(false)) {
+			tetris->moveDown();
+		}
+
+		tetris->update();
+
+	    if (displayTimer.fire()) {
+	    	tetris->draw(&setLedColor);
+
+	    	if (tetris->isPaused()) {
+	    		showPauseSign();
+	    	} else if (tetris->isGameOver()) {
+	    		// TODO goto catris
+	    	}
+
+	    	FastLED.show();
+	    }
 	}
-
-	tetris->update();
-
-    if (displayTimer.fire()) {
-    	tetris->draw(&setLedColor);
-
-    	if (tetris->isPaused()) {
-    		showPauseSign();
-    	} else if (tetris->isGameOver()) {
-    		// TODO anim and vibra
-    	}
-
-    	FastLED.show();
-    }
 
     // TODO remove
 	switch (trayState) {
@@ -244,7 +275,6 @@ void loop() {
 		tray.setDesiredState(Tray::State::Closed);
 		break;
 	}
-
 	tray.update();
 }
 
@@ -259,20 +289,20 @@ void stopMusic() {
 }
 
 void playGameMusic() {
-	playMusic(gameMusic);
+	playMusic(pmfChippy);
 }
 
 void playBeepUpSound() {
 	if (sound) {
-		const uint16_t size = sizeof(beepUp) / sizeof(beepUp[0]);
-		audio.mixin(beepUp, size);
+		const uint16_t size = sizeof(pcmBeepUp) / sizeof(pcmBeepUp[0]);
+		audio.mixin(pcmBeepUp, size);
 	}
 }
 
 void playBeepDownSound() {
 	if (sound) {
-		const uint16_t size = sizeof(beepDown) / sizeof(beepDown[0]);
-		audio.mixin(beepDown, size);
+		const uint16_t size = sizeof(pcmBeepDown) / sizeof(pcmBeepDown[0]);
+		audio.mixin(pcmBeepDown, size);
 	}
 }
 
@@ -370,7 +400,7 @@ bool buttonRepeat(bool reset) {
 }
 
 void showPauseSign() {
-	uint8_t hue = pauseSignTimer.progress(true) * 255;
+	uint8_t hue = rainbowTimer.progress(true) * 255;
 
 	for (uint8_t i = 61; i < 69; ++i) {
 		leds[i] = CRGB::Black;
@@ -390,6 +420,10 @@ void showPauseSign() {
 	for (uint8_t i = 131; i < 139; ++i) {
 		leds[i] = CRGB::Black;
 	}
+}
+
+uint8_t progMemRead(uint8_t* addr) {
+	return pgm_read_byte(addr);
 }
 
 unsigned long Timer::_millis() {

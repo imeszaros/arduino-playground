@@ -16,9 +16,10 @@
 
 // audio
 #include "pmf_player.h"
+#include "pmf_data.h"
 
 // audio data
-#include "audio_data.cpp"
+#include "audio_data.h"
 
 // vibra-motor support
 #include <Adafruit_DRV2605.h>
@@ -31,6 +32,9 @@
 
 // button and sensor debouncing
 #include <Bounce2.h>
+
+// catris
+#include "catris.h"
 
 // game engine
 #include "tetris.h"
@@ -68,6 +72,11 @@
 #define EE_ADDR_SOUND EE_ADDR_MUSIC + sizeof(bool)
 #define EE_ADDR_TRAY EE_ADDR_SOUND + sizeof(bool)
 
+// states
+#define STATE_CATRIS_LOOP 0
+#define STATE_CATRIS_ONCE 1
+#define STATE_TETRIS      2
+
 // functions
 void playMusic(const void *track);
 void stopMusic();
@@ -79,5 +88,7 @@ void setLedColor(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b);
 void tetrisEvent(TetrisEvent event, uint8_t data);
 bool buttonRepeat(bool reset);
 void showPauseSign();
+
+uint8_t progMemRead(uint8_t* addr);
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef _DAC_MCP4921_H
-#define _DAC_MCP4921_H
+#ifndef __DAC_H
+#define __DAC_H
 
 #ifndef DAC_MCP4921_SS_PORT
 #define DAC_MCP4921_SS_PORT PORTB

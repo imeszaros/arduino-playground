@@ -1,3 +1,6 @@
+#ifndef __TETRIS_H
+#define __TETRIS_H
+
 #include <stdlib.h>
 #include <inttypes.h>
 #include "graphics.h"
@@ -36,7 +39,7 @@ public:
 	};
 
 	enum Rotation {
-		rot0, rotR, rot2, rotL
+		Rot0, RotR, Rot2, RotL
 	};
 
 	static uint8_t* colorOf(Type type);
@@ -63,25 +66,25 @@ private:
 	static constexpr uint8_t _srsOffsets[] = {
 			// J, L, S, T, Z
 			5, // number of offsets per rotation, this is index 0
-			/* rot0 */ srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 0),
-			/* rotR */ srsOffset(0, 0), srsOffset(1, 0), srsOffset(1, -1), srsOffset(0, 2), srsOffset(1, 2),
-			/* rot2 */ srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 0),
-			/* rotL */ srsOffset(0, 0), srsOffset(-1, 0), srsOffset(-1, -1), srsOffset(0, 2), srsOffset(-1, 2),
+			/* Rot0 */ srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 0),
+			/* RotR */ srsOffset(0, 0), srsOffset(1, 0), srsOffset(1, -1), srsOffset(0, 2), srsOffset(1, 2),
+			/* Rot2 */ srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 0),
+			/* RotL */ srsOffset(0, 0), srsOffset(-1, 0), srsOffset(-1, -1), srsOffset(0, 2), srsOffset(-1, 2),
 
 			// I
 			5, // number of offsets per rotation, this is index 21
 
-			/* rot0 */ srsOffset(0, 0), srsOffset(-1, 0), srsOffset(2, 0), srsOffset(-1, 0), srsOffset(2, 0),
-			/* rotR */ srsOffset(-1, 0), srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 1), srsOffset(0, -2),
-			/* rot2 */ srsOffset(-1, 1), srsOffset(1, 1), srsOffset(-2, 1), srsOffset(1, 0), srsOffset(-2, 0),
-			/* rotL */ srsOffset(0, 1), srsOffset(0, 1), srsOffset(0, 1), srsOffset(0, -1), srsOffset(0, 2),
+			/* Rot0 */ srsOffset(0, 0), srsOffset(-1, 0), srsOffset(2, 0), srsOffset(-1, 0), srsOffset(2, 0),
+			/* RotR */ srsOffset(-1, 0), srsOffset(0, 0), srsOffset(0, 0), srsOffset(0, 1), srsOffset(0, -2),
+			/* Rot2 */ srsOffset(-1, 1), srsOffset(1, 1), srsOffset(-2, 1), srsOffset(1, 0), srsOffset(-2, 0),
+			/* RotL */ srsOffset(0, 1), srsOffset(0, 1), srsOffset(0, 1), srsOffset(0, -1), srsOffset(0, 2),
 
 			// O
 			1, // number of offsets per rotation, this is index 42
-			/* rot0 */ srsOffset(0, 0),
-			/* rotR */ srsOffset(0, -1),
-			/* rot2 */ srsOffset(-1, -1),
-			/* rotL */ srsOffset(-1, 0)
+			/* Rot0 */ srsOffset(0, 0),
+			/* RotR */ srsOffset(0, -1),
+			/* Rot2 */ srsOffset(-1, -1),
+			/* RotL */ srsOffset(-1, 0)
 	};
 
 	struct _Data {
@@ -268,3 +271,5 @@ private:
 	bool _rotate(Tetromino::Rotation to);
 	void _setDifficulty();
 };
+
+#endif

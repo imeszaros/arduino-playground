@@ -8,7 +8,7 @@ uint8_t* Tetromino::colorOf(Type type) {
 }
 
 Tetromino::Tetromino():
-	type(Type::I), rotation(Rotation::rot0), x(0), y(0) {}
+		type(Type::I), rotation(Rotation::Rot0), x(0), y(0) {}
 
 uint8_t* Tetromino::getColor() {
 	return colorOf(type);
@@ -43,7 +43,7 @@ uint8_t Tetromino::getSRSOffset(Tetromino::Rotation rotation, uint8_t idx) {
 
 void Tetromino::spawn(Tetromino::Type type) {
 	this->type = type;
-	rotation = Tetromino::Rotation::rot0;
+	rotation = Tetromino::Rotation::Rot0;
 	x = uint4_left(_data[type].spawnCoords);
 	y = -uint4_right(_data[type].spawnCoords);
 }
@@ -64,7 +64,7 @@ void Tetromino::draw(tetrisDisplay display, uint8_t* color) {
 }
 
 Pile::Pile(uint8_t _width, uint8_t _height):
-	_width(_width), _height(_height) {
+		_width(_width), _height(_height) {
 
 	_data = (uint8_t*) malloc(sizeof(uint8_t) * _memSize());
 
@@ -206,7 +206,7 @@ void Pile::_set(uint8_t x, uint8_t y, Tetromino::Type type) {
 }
 
 Bag::Bag(unsigned int seed):
-	_index(0) {
+		_index(0) {
 
 	for (uint8_t i = Tetromino::Type::I; i < Tetromino::Type::_; ++i) {
 		_sequence[i] = static_cast<Tetromino::Type>(i);
@@ -243,9 +243,9 @@ void Bag::shuffle() {
 }
 
 Tetris::Tetris(uint8_t _width,  uint8_t _height, unsigned int seed, tetrisListener _listener):
-	_width(_width), _height(_height), _listener(_listener),
-	 _scores(0), _rowsCompleted(0), _level(1), _gameOver(true), _paused(false),
-	_clearBackground(true), _ghostEnabled(true) {
+		_width(_width), _height(_height), _listener(_listener),
+		_scores(0), _rowsCompleted(0), _level(1), _gameOver(true), _paused(false),
+		_clearBackground(true), _ghostEnabled(true) {
 
 	_tetromino = new Tetromino();
 	_pile = new Pile(_width, _height);
@@ -316,14 +316,14 @@ bool Tetris::rotateClockWise() {
 	}
 
 	switch (_tetromino->rotation) {
-	case Tetromino::Rotation::rot0:
-		return _rotate(Tetromino::Rotation::rotR);
-	case Tetromino::Rotation::rotR:
-		return _rotate(Tetromino::Rotation::rot2);
-	case Tetromino::Rotation::rot2:
-		return _rotate(Tetromino::Rotation::rotL);
-	case Tetromino::Rotation::rotL:
-		return _rotate(Tetromino::Rotation::rot0);
+	case Tetromino::Rotation::Rot0:
+		return _rotate(Tetromino::Rotation::RotR);
+	case Tetromino::Rotation::RotR:
+		return _rotate(Tetromino::Rotation::Rot2);
+	case Tetromino::Rotation::Rot2:
+		return _rotate(Tetromino::Rotation::RotL);
+	case Tetromino::Rotation::RotL:
+		return _rotate(Tetromino::Rotation::Rot0);
 	default:
 		return false;
 	}
@@ -335,14 +335,14 @@ bool Tetris::rotateCounterClockWise() {
 	}
 
 	switch (_tetromino->rotation) {
-	case Tetromino::Rotation::rot0:
-		return _rotate(Tetromino::Rotation::rotL);
-	case Tetromino::Rotation::rotL:
-		return _rotate(Tetromino::Rotation::rot2);
-	case Tetromino::Rotation::rot2:
-		return _rotate(Tetromino::Rotation::rotR);
-	case Tetromino::Rotation::rotR:
-		return _rotate(Tetromino::Rotation::rot0);
+	case Tetromino::Rotation::Rot0:
+		return _rotate(Tetromino::Rotation::RotL);
+	case Tetromino::Rotation::RotL:
+		return _rotate(Tetromino::Rotation::Rot2);
+	case Tetromino::Rotation::Rot2:
+		return _rotate(Tetromino::Rotation::RotR);
+	case Tetromino::Rotation::RotR:
+		return _rotate(Tetromino::Rotation::Rot0);
 	default:
 		return false;
 	}

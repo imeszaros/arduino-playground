@@ -1,7 +1,7 @@
 #include "timer.h"
 
 Timer::Timer(unsigned long interval):
-	_origin(_millis()), _interval(interval) {}
+		_origin(_millis()), _interval(interval) {}
 
 void Timer::setOrigin(unsigned long origin) {
 	_origin = origin;

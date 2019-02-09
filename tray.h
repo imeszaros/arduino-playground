@@ -1,3 +1,6 @@
+#ifndef __TRAY_H
+#define __TRAY_H
+
 #include <Arduino.h>
 #include <inttypes.h>
 #include <Bounce2.h>
@@ -39,3 +42,5 @@ private:
 
 	State determineControllerState();
 };
+
+#endif
