@@ -9,9 +9,13 @@ Adafruit_DRV2605 vibra;
 
 // tray control
 Tray tray(PI_CLSD, PI_OPEN, M_ENABLE, M_CTRL_1, M_CTRL_2);
+Timer trayTimer(0);
 
 // audio output
 pmf_player audio;
+
+// catris
+Catris catris(&progMemRead, &progMemRead);
 
 // game engine
 Tetris* tetris;
@@ -28,24 +32,18 @@ Bounce rightButton = Bounce();
 Bounce downButton = Bounce();
 Timer buttonTimer(REPEAT_INTERVAL);
 
-// music enabled
-byte music = true;
-
-// sound enabled
-byte sound = true;
-
 // timers for effects
 Timer rainbowTimer(5000);
 
-// game state
+// persistent state variables
+byte music = true;
+byte sound = true;
+byte surprise = true;
+
+// volatile state variables
 uint8_t state = STATE_CATRIS_LOOP;
 bool clearCanvasOnNextLoop = true;
-
-// TODO remove
-byte trayState = 0;
-
-// catris
-Catris catris(&progMemRead, &progMemRead);
+bool surpriseMentioned = false;
 
 void setup() {
 	// power-up safety delay
@@ -106,10 +104,12 @@ void setup() {
 
     // initialize tray control
     tray.init();
+    tray.setDesiredState(tray.getCurrentState());
+    EEPROM.get(EE_ADDR_SURPRISE, surprise);
 
     // initialize tetris
     tetris = new Tetris(canvasWidth(), canvasHeight(), &tetrisEvent);
-    tetris->reset();
+    resetTetris();
 
     // initialize catris
     catris.setAnimation(Catris::Anim::Happy);
@@ -167,6 +167,27 @@ void loop() {
 		EEPROM.put(EE_ADDR_MUSIC, music);
 	}
 
+	if (resetButton.rose()) {
+		trayTimer.setOriginToNow();
+	} else if (resetButton.fell()) {
+		unsigned long elapsed = trayTimer.elapsed();
+
+		if (MILLIS_SURPRISE_STATE >= 5000 && elapsed < MILLIS_SURPRISE_TOGGLE) {
+			catris.setAnimation(Catris::Anim::Happy);
+			catris.setFormattedText("    Surprise state currently: %s", surprise ? "YES" : "NO");
+			showCatris(true);
+		} else if (elapsed >= MILLIS_SURPRISE_TOGGLE && elapsed < MILLIS_TRAY_TOGGLE) {
+			surprise = !surprise;
+			EEPROM.put(EE_ADDR_SURPRISE, surprise);
+
+			catris.setAnimation(Catris::Anim::Happy);
+			catris.setFormattedText("    Surprise changed to: %s", surprise ? "YES" : "NO");
+			showCatris(true);
+		} else if (elapsed >= MILLIS_TRAY_TOGGLE) {
+			tray.setDesiredState(tray.getDesiredState() == Tray::Closed ? Tray::Open : Tray::Closed);
+		}
+	}
+
 	if (isCatris()) {
 		if (rightButton.rose()) {
 			buttonRepeat(true);
@@ -198,7 +219,7 @@ void loop() {
 		}
 
 		if (resetButton.rose()) {
-			tetris->reset();
+			resetTetris();
 
 			playBeepUpSound();
 			playVibra(buttonPressVibra);
@@ -296,18 +317,6 @@ void loop() {
 	    }
 	}
 
-    // TODO remove
-	switch (trayState) {
-	case 0:
-		tray.setDesiredState(Tray::State::Off);
-		break;
-	case 1:
-		tray.setDesiredState(Tray::State::Open);
-		break;
-	case 2:
-		tray.setDesiredState(Tray::State::Closed);
-		break;
-	}
 	tray.update();
 }
 
@@ -374,7 +383,32 @@ void tetrisEvent(TetrisEvent event, uint8_t data) {
 		showCatris(false);
 		break;
 	case TetrisEvent::RowsCompleted:
-		// TODO check scores here
+		if (surprise) {
+			uint32_t scores = tetris->getScores();
+
+			if (scores >= SCORES_SURPRISE_REVEAL) {
+				surprise = false;
+				EEPROM.put(EE_ADDR_SURPRISE, surprise);
+				tray.setDesiredState(Tray::Open);
+
+				catris.setAnimation(Catris::Anim::Shocked);
+				catris.setText("    Oh my god 2sofix! Maci has a question for you: Will you marry him?");
+				showCatris(true);
+
+				return;
+			}
+
+			if (!surpriseMentioned && tetris->getScores() >= SCORES_SURPRISE_TEASER) {
+				surpriseMentioned = true;
+
+				catris.setAnimation(Catris::Anim::Shocked);
+				catris.setFormattedText("    %" PRIu32 " points already! There is a surprise waiting for you at %d points. Press -> to go for it!", scores, SCORES_SURPRISE_REVEAL);
+				showCatris(true);
+
+				return;
+			}
+		}
+
 		switch (data) {
 		case 1:
 			playVibra(singleRowClearVibra);
@@ -458,13 +492,18 @@ void showPauseSign() {
 	}
 }
 
+void resetTetris() {
+	tetris->reset();
+	surpriseMentioned = false;
+}
+
 bool isTetris() {
 	return state == STATE_TETRIS;
 }
 
 void showTetris() {
 	if (tetris->isGameOver()) {
-		tetris->reset();
+		resetTetris();
 	}
 
 	state = STATE_TETRIS;

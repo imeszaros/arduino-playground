@@ -74,14 +74,23 @@
 #define REPEAT_INTERVAL 50
 
 // memory address mapping
-#define EE_ADDR_MUSIC 0
-#define EE_ADDR_SOUND EE_ADDR_MUSIC + sizeof(bool)
-#define EE_ADDR_TRAY EE_ADDR_SOUND + sizeof(bool)
+#define EE_ADDR_MUSIC    0
+#define EE_ADDR_SOUND    (EE_ADDR_MUSIC + sizeof(bool))
+#define EE_ADDR_SURPRISE (EE_ADDR_SOUND + sizeof(bool))
 
 // states
 #define STATE_CATRIS_LOOP 0
 #define STATE_CATRIS_ONCE 1
 #define STATE_TETRIS      2
+
+// score triggers
+#define SCORES_SURPRISE_TEASER 100
+#define SCORES_SURPRISE_REVEAL 500
+
+// secret functions timing
+#define MILLIS_SURPRISE_STATE   5000
+#define MILLIS_SURPRISE_TOGGLE 10000
+#define MILLIS_TRAY_TOGGLE     15000
 
 // macros
 #define canvasWidth() LEDS_PER_ROW
@@ -98,6 +107,7 @@ void playVibra(const uint8_t* pattern);
 void tetrisEvent(TetrisEvent event, uint8_t data);
 bool buttonRepeat(bool reset);
 void showPauseSign();
+void resetTetris();
 bool isTetris();
 void showTetris();
 bool isCatris();

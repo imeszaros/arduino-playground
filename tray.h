@@ -27,20 +27,20 @@ public:
 	void update();
 
 private:
-	uint8_t clsdPIPin;
-	uint8_t openPIPin;
+	uint8_t _clsdPIPin;
+	uint8_t _openPIPin;
 
-	uint8_t motorCtrlEnabledPin;
-	uint8_t motorDirection1Pin;
-	uint8_t motorDirection2Pin;
+	uint8_t _motorCtrlEnabledPin;
+	uint8_t _motorDirection1Pin;
+	uint8_t _motorDirection2Pin;
 
-	Bounce clsdPI;
-	Bounce openPI;
+	Bounce _clsdPI;
+	Bounce _openPI;
 
-	State desiredState;
-	State controllerState;
+	State _desiredState;
+	State _controllerState;
 
-	State determineControllerState();
+	State _determineControllerState();
 };
 
 #endif

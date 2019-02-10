@@ -8,8 +8,10 @@ public:
 	Timer(unsigned long interval);
 
 	void setOrigin(unsigned long origin);
+	void setOriginToNow();
 	void reset(unsigned long interval);
 	float progress(bool constrain);
+	unsigned long elapsed();
 	bool fire();
 
 private:
