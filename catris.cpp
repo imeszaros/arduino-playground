@@ -50,6 +50,16 @@ Catris::Catris(fontDataReader fontDataReader, spriteDataReader spriteDataReader)
 	_worriedAnimation->setFrame(9, delay, (uint8_t*) catrisWorried2Sprite);
 	_worriedAnimation->setFrame(10, delay, (uint8_t*) catrisWorried3Sprite);
 
+	delay = 100;
+	_inLoveAnimation = new Animation(7);
+	_inLoveAnimation->setFrame(0, delay, (uint8_t*) catrisInLove1Sprite);
+	_inLoveAnimation->setFrame(1, delay, (uint8_t*) catrisInLove2Sprite);
+	_inLoveAnimation->setFrame(2, delay, (uint8_t*) catrisInLove3Sprite);
+	_inLoveAnimation->setFrame(3, delay, (uint8_t*) catrisInLove4Sprite);
+	_inLoveAnimation->setFrame(4, delay, (uint8_t*) catrisInLove3Sprite);
+	_inLoveAnimation->setFrame(5, delay, (uint8_t*) catrisInLove2Sprite);
+	_inLoveAnimation->setFrame(6, delay, (uint8_t*) catrisInLove1Sprite);
+
 	setAnimation(Anim::Happy);
 }
 
@@ -63,6 +73,9 @@ void Catris::setAnimation(Anim animation) {
 		break;
 	case Anim::Worried:
 		_loadAnimation(_worriedAnimation);
+		break;
+	case Anim::InLove:
+		_loadAnimation(_inLoveAnimation);
 		break;
 	}
 }

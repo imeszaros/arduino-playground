@@ -9,7 +9,6 @@ Adafruit_DRV2605 vibra;
 
 // tray control
 Tray tray(PI_CLSD, PI_OPEN, M_ENABLE, M_CTRL_1, M_CTRL_2);
-Timer trayTimer(0);
 
 // audio output
 pmf_player audio;
@@ -30,10 +29,11 @@ Bounce rotateRightButton = Bounce();
 Bounce leftButton = Bounce();
 Bounce rightButton = Bounce();
 Bounce downButton = Bounce();
-Timer buttonTimer(REPEAT_INTERVAL);
 
-// timers for effects
+// timers
+Timer buttonTimer(REPEAT_INTERVAL);
 Timer rainbowTimer(5000);
+Timer surpriseTimer(0);
 
 // persistent state variables
 byte music = true;
@@ -168,11 +168,11 @@ void loop() {
 	}
 
 	if (resetButton.rose()) {
-		trayTimer.setOriginToNow();
+		surpriseTimer.setOriginToNow();
 	} else if (resetButton.fell()) {
-		unsigned long elapsed = trayTimer.elapsed();
+		unsigned long elapsed = surpriseTimer.elapsed();
 
-		if (MILLIS_SURPRISE_STATE >= 5000 && elapsed < MILLIS_SURPRISE_TOGGLE) {
+		if (elapsed >= MILLIS_SURPRISE_STATE && elapsed < MILLIS_SURPRISE_TOGGLE) {
 			catris.setAnimation(Catris::Anim::Happy);
 			catris.setFormattedText("    Surprise state currently: %s", surprise ? "YES" : "NO");
 			showCatris(true);
@@ -391,7 +391,7 @@ void tetrisEvent(TetrisEvent event, uint8_t data) {
 				EEPROM.put(EE_ADDR_SURPRISE, surprise);
 				tray.setDesiredState(Tray::Open);
 
-				catris.setAnimation(Catris::Anim::Shocked);
+				catris.setAnimation(Catris::Anim::InLove);
 				catris.setText("    Oh my god 2sofix! Maci has a question for you: Will you marry him?");
 				showCatris(true);
 

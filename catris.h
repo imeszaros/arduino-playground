@@ -14,7 +14,8 @@ public:
 
 		Happy,
 		Shocked,
-		Worried
+		Worried,
+		InLove
 	};
 
 	Catris(fontDataReader fontDataReader, spriteDataReader spriteDataReader);
@@ -42,6 +43,7 @@ private:
 	Animation* _happyAnimation;
 	Animation* _shockedAnimation;
 	Animation* _worriedAnimation;
+	Animation* _inLoveAnimation;
 
 	uint8_t _animFrame;
 
