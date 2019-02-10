@@ -122,6 +122,14 @@ void hsv2rgb(double H, double S, double V, uint8_t* output) {
 	output[2] = b * 255;
 }
 
+void clearCanvas(canvas canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+	for (uint8_t  _x = x; _x < width; ++_x) {
+		for (uint8_t _y = y; _y < height; ++_y) {
+			canvas(_x, _y, 0, 0, 0);
+		}
+	}
+}
+
 ScrollText::ScrollText(uint8_t x, uint8_t y, uint8_t width, fontDataReader fontDataReader, uint8_t* font):
 		_x(x), _y(y), _width(width), _fontDataReader(fontDataReader), _font(font),
 		_clearBackground(true), _text(NULL), _textLength(0), _position(0), _offset(0) {
@@ -146,11 +154,7 @@ void ScrollText::setText(const char* text) {
 
 void ScrollText::draw(canvas canvas, uint8_t * color) {
 	if (_clearBackground) {
-		for (uint8_t x = _x, w = _x + _width; x < w; ++x) {
-			for (uint8_t y = _y, h = _y + _charHeight; y < h; ++y) {
-				canvas(x, y, 0, 0, 0);
-			}
-		}
+		clearCanvas(canvas, _x, _y, _x + _width, _y + _charHeight);
 	}
 
 	uint16_t pos = _position;

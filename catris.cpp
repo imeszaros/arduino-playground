@@ -1,7 +1,7 @@
 #include "catris.h"
 
 Catris::Catris(fontDataReader fontDataReader, spriteDataReader spriteDataReader):
-		_fontDataReader(fontDataReader), _spriteDataReader(spriteDataReader) {
+		_fontDataReader(fontDataReader), _spriteDataReader(spriteDataReader), _buffer(NULL) {
 
 	_rainbowTimer = new Timer(8000);
 	_scrollTimer = new Timer(90);
@@ -69,6 +69,26 @@ void Catris::setAnimation(Anim animation) {
 
 void Catris::setText(const char* text) {
 	_scrollText->setText(text);
+}
+
+void Catris::setFormattedText(const char* format, ...) {
+	if (_buffer != NULL) {
+		free(_buffer);
+	}
+
+	va_list args;
+
+	va_start(args, format);
+	int len = vsnprintf(NULL, 0, format, args) + 1;
+	va_end(args);
+
+	_buffer = (char*) malloc(len);
+
+	va_start(args, format);
+	vsprintf(_buffer, format, args);
+	va_end(args);
+
+	setText(_buffer);
 }
 
 bool Catris::update() {

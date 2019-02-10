@@ -39,6 +39,7 @@ Timer rainbowTimer(5000);
 
 // game state
 uint8_t state = STATE_CATRIS_LOOP;
+bool clearCanvasOnNextLoop = true;
 
 // TODO remove
 byte trayState = 0;
@@ -49,7 +50,11 @@ Catris catris(&progMemRead, &progMemRead);
 void setup() {
 	// power-up safety delay
     delay(500);
-    // TODO remove Serial.begin(7680);
+
+    // turn on serial interface in debug mode
+    if (DEBUG) {
+        Serial.begin(7680);
+    }
 
     // initialize buttons
     pauseButton.attach(BTN_PAUSE, INPUT);
@@ -79,10 +84,10 @@ void setup() {
 	downButton.attach(BTN_DOWN, INPUT);
 	downButton.interval(5);
 
+	// initialize audio output
 	EEPROM.get(EE_ADDR_MUSIC, music);
 	EEPROM.get(EE_ADDR_SOUND, sound);
 
-	// initialize audio output
 	audio.enable_output();
 	playGameMusic();
 
@@ -100,11 +105,11 @@ void setup() {
 
     // initialize catris
     catris.setAnimation(Catris::Anim::Happy);
-    catris.setText("    *purr-purr* Hello 2sofix! I am Catris. Ready to play? Press -> to begin.");
+    catris.setText("    *purr-purr* Hello 2sofix! I am your guide, Catris. Ready to play? Press -> to begin.");
 
     // initialize tetris
     Entropy.initialize();
-    tetris = new Tetris(LEDS_PER_ROW, NUM_LEDS / LEDS_PER_ROW, Entropy.random(), &tetrisEvent);
+    tetris = new Tetris(canvasWidth(), canvasHeight(), Entropy.random(), &tetrisEvent);
     tetris->reset();
 }
 
@@ -118,6 +123,11 @@ void loop() {
 	leftButton.update();
 	rightButton.update();
 	downButton.update();
+
+	if (clearCanvasOnNextLoop) {
+		clearCanvasOnNextLoop = false;
+		clrscr();
+	}
 
 	if (music) {
 		audio.update();
@@ -147,26 +157,24 @@ void loop() {
 		EEPROM.put(EE_ADDR_MUSIC, music);
 	}
 
-	if (state == STATE_CATRIS_LOOP || state == STATE_CATRIS_ONCE) {
+	if (isCatris()) {
 		if (rightButton.rose()) {
 			buttonRepeat(true);
-			state = STATE_TETRIS;
+			showTetris();
 			playBeepUpSound();
 			playButtonPressVibra();
 		}
 
 		bool finished = catris.update();
 		if (state == STATE_CATRIS_ONCE && finished) {
-			state = STATE_TETRIS;
+			showTetris();
 		}
 
-		catris.update();
-
 	    if (displayTimer.fire()) {
-	    	catris.draw(&setLedColor);
+	    	catris.draw(&setCanvas);
 	    	FastLED.show();
 	    }
-	} else if (state == STATE_TETRIS) {
+	} else if (isTetris()) {
 		if (pauseButton.rose()) {
 			if (tetris->isPaused()) {
 				playBeepUpSound();
@@ -251,12 +259,17 @@ void loop() {
 		tetris->update();
 
 	    if (displayTimer.fire()) {
-	    	tetris->draw(&setLedColor);
+	    	if (tetris->isGameOver()) {
+	    		playGameOverVibra();
+	    		catris.setAnimation(Catris::Anim::Worried);
+	    		catris.setText("    Oh-no! Game over. Press -> to try again.");
+				showCatris(true);
+	    	} else {
+		    	tetris->draw(&setCanvas);
 
-	    	if (tetris->isPaused()) {
-	    		showPauseSign();
-	    	} else if (tetris->isGameOver()) {
-	    		// TODO goto catris
+		    	if (tetris->isPaused()) {
+					showPauseSign();
+				}
 	    	}
 
 	    	FastLED.show();
@@ -312,20 +325,26 @@ void playButtonPressVibra() {
 	vibra.go();
 }
 
-void playSingleLineClearVibra() {
+void playGameOverVibra() {
+	vibra.setWaveform(0, 1);
+	vibra.setWaveform(1, 0);
+	vibra.go();
+}
+
+void playSingleRowClearVibra() {
 	vibra.setWaveform(0, 7);
 	vibra.setWaveform(1, 0);
 	vibra.go();
 }
 
-void playDoubleLineClearVibra() {
+void playDoubleRowClearVibra() {
 	vibra.setWaveform(0, 7);
 	vibra.setWaveform(1, 7);
 	vibra.setWaveform(2, 0);
 	vibra.go();
 }
 
-void playTripleLineClearVibra() {
+void playTripleRowClearVibra() {
 	vibra.setWaveform(0, 7);
 	vibra.setWaveform(1, 7);
 	vibra.setWaveform(2, 7);
@@ -350,36 +369,47 @@ void playLevelUpVibra() {
 	vibra.go();
 }
 
-void setLedColor(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b) {
-	if (x < 0 || x >= LEDS_PER_ROW || y < 0 || y >= (NUM_LEDS / LEDS_PER_ROW)) {
+void setCanvas(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b) {
+	if (x < 0 || x >= canvasWidth() || y < 0 || y >= canvasHeight()) {
 		return;
 	}
 
-	leds[y * LEDS_PER_ROW + (y % 2 == 0 ? x : LEDS_PER_ROW - x - 1)].setRGB(r, g, b);
+	leds[y * canvasWidth() + (y % 2 == 0 ? x : canvasWidth() - x - 1)].setRGB(r, g, b);
 }
 
 void tetrisEvent(TetrisEvent event, uint8_t data) {
 	switch (event) {
 	case TetrisEvent::LevelUp:
 		playLevelUpVibra();
-		// TODO anim
+		catris.setAnimation(Catris::Anim::Happy);
+		catris.setFormattedText("    You've reached level %d with %d points. Keep up!", data, tetris->getScores());
+		showCatris(false);
 		break;
-	case TetrisEvent::LinesCompleted:
+	case TetrisEvent::RowsCompleted:
+		// TODO check scores here
 		switch (data) {
 		case 1:
-			playSingleLineClearVibra();
+			playSingleRowClearVibra();
+			if (tetris->getRowsCompleted() == 1) {
+				catris.setAnimation(Catris::Anim::Happy);
+				catris.setText("    Your first clear.. Stunning!");
+				showCatris(false);
+			}
 			break;
 		case 2:
-			playDoubleLineClearVibra();
-			// TODO anim
+			playDoubleRowClearVibra();
 			break;
 		case 3:
-			playTripleLineClearVibra();
-			// TODO anim
+			playTripleRowClearVibra();
+			catris.setAnimation(Catris::Anim::Happy);
+			catris.setText("    Three at once! You're amazing!");
+			showCatris(false);
 			break;
 		case 4:
 			playTetrisVibra();
-			// TODO anim
+			catris.setAnimation(Catris::Anim::Shocked);
+			catris.setText("    TETRIS! Your're the master!");
+			showCatris(false);
 			break;
 		default:
 			;
@@ -420,6 +450,27 @@ void showPauseSign() {
 	for (uint8_t i = 131; i < 139; ++i) {
 		leds[i] = CRGB::Black;
 	}
+}
+
+bool isTetris() {
+	return state == STATE_TETRIS;
+}
+
+void showTetris() {
+	if (tetris->isGameOver()) {
+		tetris->reset();
+	}
+
+	state = STATE_TETRIS;
+}
+
+bool isCatris() {
+	return state == STATE_CATRIS_LOOP || state == STATE_CATRIS_ONCE;
+}
+
+void showCatris(bool loop) {
+	clearCanvasOnNextLoop = true;
+	state = loop ? STATE_CATRIS_LOOP : STATE_CATRIS_ONCE;
 }
 
 uint8_t progMemRead(uint8_t* addr) {

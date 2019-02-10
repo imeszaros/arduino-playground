@@ -6,7 +6,8 @@
 #include "graphics.h"
 #include "timer.h"
 
-#define TETROMINO_COUNT 7
+#define TETROMINO_COUNT  7
+#define PILE_HIDDEN_ROWS 3
 
 #define uint4_pack(a, b) (a << 4 | (b & 0b1111))
 #define uint4_left(i) (i >> 4)
@@ -24,10 +25,9 @@
 #define minoY(tetrominoY, tetrominoWidth, minoIdx) (tetrominoY + minoIdx / tetrominoWidth)
 
 enum TetrisEvent {
-	LevelUp, LinesCompleted, GameOver
+	LevelUp, RowsCompleted, GameOver
 };
 
-typedef void (*tetrisDisplay) (int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b);
 typedef void (*tetrisListener) (TetrisEvent event, uint8_t data);
 
 class Tetromino {
@@ -59,7 +59,7 @@ public:
 	uint8_t getSRSOffsetCount();
 	uint8_t getSRSOffset(Rotation rotation, uint8_t idx);
 	void spawn(Type type);
-	void draw(tetrisDisplay display, uint8_t* color);
+	void draw(canvas canvas, uint8_t* color);
 
 private:
 
@@ -190,10 +190,10 @@ public:
 
 	Pile(uint8_t width, uint8_t height);
 
-	bool isOccupied(uint8_t x, uint8_t y);
+	bool isOccupied(uint8_t x, int8_t y);
 	void merge(Tetromino* tetromino);
 	uint8_t clearCompleteRows();
-	void draw(tetrisDisplay display);
+	void draw(canvas canvas);
 	void truncate();
 
 private:
@@ -204,9 +204,9 @@ private:
 
 	uint8_t _cellCount();
 	uint8_t _memSize();
-	uint8_t _cell(uint8_t x, uint8_t y);
-	Tetromino::Type _get(uint8_t x, uint8_t y);
-	void _set(uint8_t x, uint8_t y, Tetromino::Type);
+	uint8_t _cell(uint8_t x, int8_t y);
+	Tetromino::Type _get(uint8_t x, int8_t y);
+	void _set(uint8_t x, int8_t y, Tetromino::Type);
 };
 
 class Bag {
@@ -236,6 +236,8 @@ public:
 	bool isPaused();
 	void setPaused(bool paused);
 	uint32_t getScores();
+	uint16_t getRowsCompleted();
+	uint8_t getLevel();
 	Tetromino::Type preview();
 	bool moveLeft();
 	bool moveRight();
@@ -245,7 +247,7 @@ public:
 	void setClearBackground(bool clearBackground);
 	void setGhostEnabled(bool ghostEnabled);
 	void update();
-	void draw(tetrisDisplay display);
+	void draw(canvas canvas);
 
 private:
 
@@ -269,7 +271,7 @@ private:
 	bool _checkTetromino();
 	bool _move(int8_t x, int8_t y);
 	bool _rotate(Tetromino::Rotation to);
-	void _setDifficulty();
+	bool _setDifficulty();
 };
 
 #endif

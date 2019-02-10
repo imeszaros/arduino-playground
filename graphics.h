@@ -40,6 +40,8 @@ void drawSprite(canvas canvas, const uint8_t palette[][3], spriteDataReader spri
 
 void hsv2rgb(double H, double S, double V, uint8_t* output);
 
+void clearCanvas(canvas canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+
 class ScrollText {
 
 public:

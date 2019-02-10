@@ -3,6 +3,9 @@
 
 #include "Arduino.h"
 
+// debug mode
+#define DEBUG false
+
 // display
 #define SPI_UART1_DATA  11
 #define SPI_UART1_CLOCK 12
@@ -77,6 +80,11 @@
 #define STATE_CATRIS_ONCE 1
 #define STATE_TETRIS      2
 
+// macros
+#define canvasWidth() LEDS_PER_ROW
+#define canvasHeight() (NUM_LEDS / LEDS_PER_ROW)
+#define clrscr() clearCanvas(&setCanvas, 0, 0, canvasWidth(), canvasHeight())
+
 // functions
 void playMusic(const void *track);
 void stopMusic();
@@ -84,11 +92,15 @@ void playGameMusic();
 void playBeepUpSound();
 void playBeepDownSound();
 void playButtonPressVibra();
-void setLedColor(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b);
+void playGameOverVibra();
 void tetrisEvent(TetrisEvent event, uint8_t data);
 bool buttonRepeat(bool reset);
 void showPauseSign();
-
+bool isTetris();
+void showTetris();
+bool isCatris();
+void showCatris(bool loop);
+void setCanvas(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b);
 uint8_t progMemRead(uint8_t* addr);
 
 #endif

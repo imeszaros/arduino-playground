@@ -21,6 +21,7 @@ public:
 
 	void setAnimation(Anim animation);
 	void setText(const char* text);
+	void setFormattedText(const char* format, ...);
 	bool update();
 	void draw(canvas canvas);
 
@@ -34,6 +35,7 @@ private:
 	Timer* _animTimer;
 
 	ScrollText* _scrollText;
+	char* _buffer;
 
 	Animation* _currentAnimation;
 
