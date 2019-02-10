@@ -4,7 +4,7 @@ Catris::Catris(fontDataReader fontDataReader, spriteDataReader spriteDataReader)
 		_fontDataReader(fontDataReader), _spriteDataReader(spriteDataReader), _buffer(NULL) {
 
 	_rainbowTimer = new Timer(8000);
-	_scrollTimer = new Timer(90);
+	_scrollTimer = new Timer(60);
 	_animTimer = new Timer(0);
 
 	_scrollText = new ScrollText(0, 14, 10, fontDataReader, (uint8_t*) bmp4x5Font);

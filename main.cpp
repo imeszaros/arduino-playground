@@ -56,6 +56,10 @@ void setup() {
         Serial.begin(7680);
     }
 
+    // initialize random generator
+    Entropy.initialize();
+    srand(Entropy.random());
+
     // initialize buttons
     pauseButton.attach(BTN_PAUSE, INPUT);
     pauseButton.interval(5);
@@ -103,14 +107,20 @@ void setup() {
     // initialize tray control
     tray.init();
 
+    // initialize tetris
+    tetris = new Tetris(canvasWidth(), canvasHeight(), &tetrisEvent);
+    tetris->reset();
+
     // initialize catris
     catris.setAnimation(Catris::Anim::Happy);
-    catris.setText("    *purr-purr* Hello 2sofix! I am your guide, Catris. Ready to play? Press -> to begin.");
+    catris.setFormattedText(randomText(5,
+    		"    *purr-purr* Hello, 2sofix! %s",
+			"    Howdy, 2sofix! %s",
+			"    Feeling good, 2sofix? %s",
+			"    Welcome back, 2sofix! %s",
+			"    *meow-meow* Hi there, 2sofix! %s"),
 
-    // initialize tetris
-    Entropy.initialize();
-    tetris = new Tetris(canvasWidth(), canvasHeight(), Entropy.random(), &tetrisEvent);
-    tetris->reset();
+    		"I am your guide, Catris. Ready to play? Press -> to begin.");
 }
 
 void loop() {
@@ -137,7 +147,7 @@ void loop() {
 		sound = !sound;
 
 		playBeepUpSound();
-		playButtonPressVibra();
+		playVibra(buttonPressVibra);
 
 		EEPROM.put(EE_ADDR_SOUND, sound);
 	}
@@ -152,7 +162,7 @@ void loop() {
 		}
 
 		playBeepUpSound();
-		playButtonPressVibra();
+		playVibra(buttonPressVibra);
 
 		EEPROM.put(EE_ADDR_MUSIC, music);
 	}
@@ -162,7 +172,7 @@ void loop() {
 			buttonRepeat(true);
 			showTetris();
 			playBeepUpSound();
-			playButtonPressVibra();
+			playVibra(buttonPressVibra);
 		}
 
 		bool finished = catris.update();
@@ -184,14 +194,14 @@ void loop() {
 				tetris->setPaused(true);
 			}
 
-			playButtonPressVibra();
+			playVibra(buttonPressVibra);
 		}
 
 		if (resetButton.rose()) {
 			tetris->reset();
 
 			playBeepUpSound();
-			playButtonPressVibra();
+			playVibra(buttonPressVibra);
 		}
 
 		if (rotateLeftButton.rose()) {
@@ -201,7 +211,7 @@ void loop() {
 				playBeepDownSound();
 			}
 
-			playButtonPressVibra();
+			playVibra(buttonPressVibra);
 		}
 
 		if (rotateRightButton.rose()) {
@@ -211,7 +221,7 @@ void loop() {
 				playBeepDownSound();
 			}
 
-			playButtonPressVibra();
+			playVibra(buttonPressVibra);
 		}
 
 		if (leftButton.rose()) {
@@ -223,7 +233,7 @@ void loop() {
 				playBeepDownSound();
 			}
 
-			playButtonPressVibra();
+			playVibra(buttonPressVibra);
 		} else if (leftButton.read() && buttonRepeat(false)) {
 			tetris->moveLeft();
 		}
@@ -237,7 +247,7 @@ void loop() {
 				playBeepDownSound();
 			}
 
-			playButtonPressVibra();
+			playVibra(buttonPressVibra);
 		} else if (rightButton.read() && buttonRepeat(false)) {
 			tetris->moveRight();
 		}
@@ -251,7 +261,7 @@ void loop() {
 				playBeepDownSound();
 			}
 
-			playButtonPressVibra();
+			playVibra(buttonPressVibra);
 		} else if (downButton.read() && buttonRepeat(false)) {
 			tetris->moveDown();
 		}
@@ -260,9 +270,19 @@ void loop() {
 
 	    if (displayTimer.fire()) {
 	    	if (tetris->isGameOver()) {
-	    		playGameOverVibra();
+	    		playVibra(gameOverVibra);
 	    		catris.setAnimation(Catris::Anim::Worried);
-	    		catris.setText("    Oh-no! Game over. Press -> to try again.");
+	    		catris.setFormattedText(randomText(5,
+	    				"    Oh-no! Game over. You were at level %" PRIu8 " with %" PRIu32 " points. %s",
+						"    Damn.. Game over. You were at level %" PRIu8 " with %" PRIu32 " points. %s",
+						"    Isn't so easy, right? You were at level %" PRIu8 " with %" PRIu32 " points. %s",
+						"    Better luck next time, maybe! You were at level %" PRIu8 " with %" PRIu32 " points. %s",
+						"    Don't be sad, it's just a game.. You were at level %" PRIu8 " with %" PRIu32 " points. %s"),
+
+	    				tetris->getLevel(),
+						tetris->getScores(),
+	    				"Press -> to try again.");
+
 				showCatris(true);
 	    	} else {
 		    	tetris->draw(&setCanvas);
@@ -319,53 +339,15 @@ void playBeepDownSound() {
 	}
 }
 
-void playButtonPressVibra() {
-	vibra.setWaveform(0, 1);
-	vibra.setWaveform(1, 0);
-	vibra.go();
-}
+void playVibra(const uint8_t* pattern) {
+	uint8_t effects = pgm_read_byte(pattern);
+	uint8_t i = 0;
 
-void playGameOverVibra() {
-	vibra.setWaveform(0, 1);
-	vibra.setWaveform(1, 0);
-	vibra.go();
-}
+	for (; i < effects; ++i) {
+		vibra.setWaveform(i, pgm_read_byte(pattern + i + 1));
+	}
 
-void playSingleRowClearVibra() {
-	vibra.setWaveform(0, 7);
-	vibra.setWaveform(1, 0);
-	vibra.go();
-}
-
-void playDoubleRowClearVibra() {
-	vibra.setWaveform(0, 7);
-	vibra.setWaveform(1, 7);
-	vibra.setWaveform(2, 0);
-	vibra.go();
-}
-
-void playTripleRowClearVibra() {
-	vibra.setWaveform(0, 7);
-	vibra.setWaveform(1, 7);
-	vibra.setWaveform(2, 7);
-	vibra.setWaveform(3, 0);
-	vibra.go();
-}
-
-void playTetrisVibra() {
-	vibra.setWaveform(0, 52);
-	vibra.setWaveform(1, 52);
-	vibra.setWaveform(2, 52);
-	vibra.setWaveform(3, 52);
-	vibra.setWaveform(4, 0);
-	vibra.go();
-}
-
-void playLevelUpVibra() {
-	vibra.setWaveform(0, 89);
-	vibra.setWaveform(1, 89);
-	vibra.setWaveform(2, 89);
-	vibra.setWaveform(3, 0);
+	vibra.setWaveform(i, 0);
 	vibra.go();
 }
 
@@ -380,35 +362,59 @@ void setCanvas(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b) {
 void tetrisEvent(TetrisEvent event, uint8_t data) {
 	switch (event) {
 	case TetrisEvent::LevelUp:
-		playLevelUpVibra();
+		playVibra(levelUpVibra);
 		catris.setAnimation(Catris::Anim::Happy);
-		catris.setFormattedText("    You've reached level %d with %d points. Keep up!", data, tetris->getScores());
+		catris.setFormattedText(randomText(5,
+				"    You've reached level %" PRIu8 " with %" PRIu32 " points. Keep up!",
+				"    It's level %" PRIu8 " already! You have %" PRIu32 " points. You rock!",
+				"    Level %" PRIu8 " is here! Precious %" PRIu32 " points are now yours.",
+				"    There's no stopping. Let's see level %" PRIu8 ". %" PRIu32 " points earned so far.",
+				"    What a march! Here comes level %" PRIu8 "! Mighty %" PRIu32 " points for you."), data, tetris->getScores());
+
 		showCatris(false);
 		break;
 	case TetrisEvent::RowsCompleted:
 		// TODO check scores here
 		switch (data) {
 		case 1:
-			playSingleRowClearVibra();
+			playVibra(singleRowClearVibra);
 			if (tetris->getRowsCompleted() == 1) {
 				catris.setAnimation(Catris::Anim::Happy);
-				catris.setText("    Your first clear.. Stunning!");
+				catris.setText(randomText(5,
+						"    Your first clear.. Stunning!",
+						"    So adorable! The first complete line!",
+						"    I can feel the power in you!",
+						"    That's how professionals begin!"
+						"    Tetrominoes are all afraid of you now!"));
+
 				showCatris(false);
 			}
 			break;
 		case 2:
-			playDoubleRowClearVibra();
+			playVibra(doubleRowClearVibra);
 			break;
 		case 3:
-			playTripleRowClearVibra();
+			playVibra(tripleRowClearVibra);
 			catris.setAnimation(Catris::Anim::Happy);
-			catris.setText("    Three at once! You're amazing!");
+			catris.setText(randomText(5,
+					"    Three at once! You're amazing!",
+					"    Three lines by one move.. delicious!",
+					"    Three at once? Marvellous!",
+					"    Playing fancy? 3 by 1.",
+					"    I'm starting to take you seriously. 3 by 1."));
+
 			showCatris(false);
 			break;
 		case 4:
-			playTetrisVibra();
+			playVibra(tetrisVibra);
 			catris.setAnimation(Catris::Anim::Shocked);
-			catris.setText("    TETRIS! Your're the master!");
+			catris.setText(randomText(5,
+					"    TETRIS! Your're the master!",
+					"    TETRIS! All could learn from you!",
+					"    TETRIS! Are you on steroids?",
+					"    TETRIS! Tetrominoes, obey 2sofix!",
+					"    TETRIS! It's just crazy!"));
+
 			showCatris(false);
 			break;
 		default:
@@ -475,6 +481,22 @@ void showCatris(bool loop) {
 
 uint8_t progMemRead(uint8_t* addr) {
 	return pgm_read_byte(addr);
+}
+
+const char* randomText(uint8_t count, ...) {
+	int r = rand() % count;
+	const char* ret = NULL;
+
+	va_list args;
+	va_start(args, count);
+
+	for (uint8_t i = 0; i <= r; ++i) {
+		ret = va_arg(args, const char*);
+	}
+
+	va_end(args);
+
+	return ret;
 }
 
 unsigned long Timer::_millis() {

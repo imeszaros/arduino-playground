@@ -213,7 +213,7 @@ class Bag {
 
 public:
 
-	Bag(unsigned int seed);
+	Bag();
 
 	Tetromino::Type peek();
 	Tetromino::Type pop();
@@ -229,7 +229,7 @@ class Tetris {
 
 public:
 
-	Tetris(uint8_t width,  uint8_t height, unsigned int seed, tetrisListener _listener);
+	Tetris(uint8_t width,  uint8_t height, tetrisListener _listener);
 
 	void reset();
 	bool isGameOver();

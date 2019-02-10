@@ -24,6 +24,9 @@
 // audio data
 #include "audio_data.h"
 
+// vibration data
+#include "vibra_data.h"
+
 // vibra-motor support
 #include <Adafruit_DRV2605.h>
 
@@ -91,8 +94,7 @@ void stopMusic();
 void playGameMusic();
 void playBeepUpSound();
 void playBeepDownSound();
-void playButtonPressVibra();
-void playGameOverVibra();
+void playVibra(const uint8_t* pattern);
 void tetrisEvent(TetrisEvent event, uint8_t data);
 bool buttonRepeat(bool reset);
 void showPauseSign();
@@ -102,5 +104,6 @@ bool isCatris();
 void showCatris(bool loop);
 void setCanvas(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b);
 uint8_t progMemRead(uint8_t* addr);
+const char* randomText(uint8_t count, ...);
 
 #endif

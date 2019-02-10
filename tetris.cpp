@@ -195,14 +195,12 @@ void Pile::_set(uint8_t x, int8_t y, Tetromino::Type type) {
 	}
 }
 
-Bag::Bag(unsigned int seed):
+Bag::Bag():
 		_index(0) {
 
 	for (uint8_t i = Tetromino::Type::I; i < Tetromino::Type::_; ++i) {
 		_sequence[i] = static_cast<Tetromino::Type>(i);
 	}
-
-	srand(seed);
 }
 
 Tetromino::Type Bag::peek() {
@@ -232,14 +230,14 @@ void Bag::shuffle() {
 	_index = 0;
 }
 
-Tetris::Tetris(uint8_t _width,  uint8_t _height, unsigned int seed, tetrisListener _listener):
+Tetris::Tetris(uint8_t _width,  uint8_t _height, tetrisListener _listener):
 		_width(_width), _height(_height), _listener(_listener),
 		_scores(0), _rowsCompleted(0), _level(1), _gameOver(true), _paused(false),
 		_clearBackground(true), _ghostEnabled(true) {
 
 	_tetromino = new Tetromino();
 	_pile = new Pile(_width, _height);
-	_bag = new Bag(seed);
+	_bag = new Bag();
 
 	_updateTimer = new Timer(500);
 	_ghostTimer = new Timer(1000);
