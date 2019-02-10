@@ -36,7 +36,7 @@ Timer rainbowTimer(5000);
 Timer surpriseTimer(0);
 
 // persistent state variables
-byte music = true;
+byte music = 0;
 byte sound = true;
 byte surprise = true;
 
@@ -91,7 +91,7 @@ void setup() {
 	EEPROM.get(EE_ADDR_SOUND, sound);
 
 	audio.enable_output();
-	playGameMusic();
+	playMusic();
 
 	// initialize display
     FastLED.addLeds<LED_TYPE, LED_SDI, LED_SCK, COLOR_ORDER, DATA_RATE_MHZ(20)>(leds, NUM_LEDS).setCorrection(UncorrectedColor);
@@ -153,18 +153,14 @@ void loop() {
 	}
 
 	if (musicButton.rose()) {
-		music = !music;
+		music = music == 4 ? 0 : music + 1;
 
-		if (music) {
-			playGameMusic();
-		} else {
-			stopMusic();
-		}
+		EEPROM.put(EE_ADDR_MUSIC, music);
+
+		playMusic();
 
 		playBeepUpSound();
 		playVibra(buttonPressVibra);
-
-		EEPROM.put(EE_ADDR_MUSIC, music);
 	}
 
 	if (resetButton.rose()) {
@@ -320,18 +316,24 @@ void loop() {
 	tray.update();
 }
 
-void playMusic(const void *track) {
-	if (music) {
-		audio.start(track);
+void playMusic() {
+	switch (music) {
+	case 0:
+		audio.stop();
+		break;
+	case 1:
+		audio.start(pmfTetris);
+		break;
+	case 2:
+		audio.start(pmfLoveYa);
+		break;
+	case 3:
+		audio.start(pmfLoveInMyDreams);
+		break;
+	case 4:
+		audio.start(pmfChippy);
+		break;
 	}
-}
-
-void stopMusic() {
-	audio.stop();
-}
-
-void playGameMusic() {
-	playMusic(pmfChippy);
 }
 
 void playBeepUpSound() {

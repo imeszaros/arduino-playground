@@ -7,7 +7,7 @@ Catris::Catris(fontDataReader fontDataReader, spriteDataReader spriteDataReader)
 	_scrollTimer = new Timer(60);
 	_animTimer = new Timer(0);
 
-	_scrollText = new ScrollText(0, 14, 10, fontDataReader, (uint8_t*) bmp4x5Font);
+	_scrollText = new ScrollText(0, 14, 10, fontDataReader, (uint8_t*) font4x5);
 
 	uint8_t delay = 150;
 	_happyAnimation = new Animation(12);

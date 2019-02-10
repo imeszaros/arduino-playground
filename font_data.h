@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-const uint8_t PROGMEM bmp4x5Font[] = {
+const uint8_t PROGMEM font4x5[] = {
 
 		// header: char height | bytes per char
 		(5 << 4) | 3,

@@ -75,7 +75,7 @@
 
 // memory address mapping
 #define EE_ADDR_MUSIC    0
-#define EE_ADDR_SOUND    (EE_ADDR_MUSIC + sizeof(bool))
+#define EE_ADDR_SOUND    (EE_ADDR_MUSIC + sizeof(byte))
 #define EE_ADDR_SURPRISE (EE_ADDR_SOUND + sizeof(bool))
 
 // states
@@ -98,9 +98,7 @@
 #define clrscr() clearCanvas(&setCanvas, 0, 0, canvasWidth(), canvasHeight())
 
 // functions
-void playMusic(const void *track);
-void stopMusic();
-void playGameMusic();
+void playMusic();
 void playBeepUpSound();
 void playBeepDownSound();
 void playVibra(const uint8_t* pattern);
