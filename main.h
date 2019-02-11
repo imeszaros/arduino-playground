@@ -101,6 +101,7 @@
 void playMusic();
 void playBeepUpSound();
 void playBeepDownSound();
+void playSuccessSound();
 void playVibra(const uint8_t* pattern);
 void tetrisEvent(TetrisEvent event, uint8_t data);
 bool buttonRepeat(bool reset);

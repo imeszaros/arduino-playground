@@ -10,32 +10,37 @@ const uint8_t PROGMEM buttonPressVibra[] = {
 
 const uint8_t PROGMEM gameOverVibra[] = {
 
-	1, 1
+	2, 106, 70
 };
 
 const uint8_t PROGMEM singleRowClearVibra[] = {
 
-	1, 7
+	1, 14
 };
 
 const uint8_t PROGMEM doubleRowClearVibra[] = {
 
-	2, 7, 7
+	3, 14, 51, 14
 };
 
 const uint8_t PROGMEM tripleRowClearVibra[] = {
 
-	3, 7, 7, 7
+	5, 89, 51, 89, 51, 89
 };
 
 const uint8_t PROGMEM tetrisVibra[] = {
 
-	4, 52, 52, 52, 52
+	7, 83, 51, 83, 51, 83, 51, 83
 };
 
 const uint8_t PROGMEM levelUpVibra[] = {
 
-	3, 89, 89, 89
+	5, 83, 51, 83, 51, 83
+};
+
+const uint8_t PROGMEM surpriseVibra[] = {
+
+	7, 83, 12, 83, 12, 83, 89, 16
 };
 
 #endif

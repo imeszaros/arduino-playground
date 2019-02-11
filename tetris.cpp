@@ -383,7 +383,7 @@ void Tetris::update() {
 			_rowsCompleted += rowsCleared;
 
 			if (!_setDifficulty()) {
-				if (_listener != NULL) {
+				if (_listener != NULL && rowsCleared > 0) {
 					_listener(TetrisEvent::RowsCompleted, rowsCleared);
 				}
 			}

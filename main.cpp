@@ -146,10 +146,10 @@ void loop() {
 	if (soundButton.rose()) {
 		sound = !sound;
 
+		EEPROM.put(EE_ADDR_SOUND, sound);
+
 		playBeepUpSound();
 		playVibra(buttonPressVibra);
-
-		EEPROM.put(EE_ADDR_SOUND, sound);
 	}
 
 	if (musicButton.rose()) {
@@ -187,9 +187,11 @@ void loop() {
 	if (isCatris()) {
 		if (rightButton.rose()) {
 			buttonRepeat(true);
-			showTetris();
+
 			playBeepUpSound();
 			playVibra(buttonPressVibra);
+
+			showTetris();
 		}
 
 		bool finished = catris.update();
@@ -287,7 +289,9 @@ void loop() {
 
 	    if (displayTimer.fire()) {
 	    	if (tetris->isGameOver()) {
+	    		playBeepDownSound();
 	    		playVibra(gameOverVibra);
+
 	    		catris.setAnimation(Catris::Anim::Worried);
 	    		catris.setFormattedText(randomText(5,
 	    				"    Oh-no! Game over. You were at level %" PRIu8 " with %" PRIu32 " points. %s",
@@ -350,6 +354,13 @@ void playBeepDownSound() {
 	}
 }
 
+void playSuccessSound() {
+	if (sound) {
+		const uint16_t size = sizeof(pcmSuccess) / sizeof(pcmSuccess[0]);
+		audio.mixin(pcmSuccess, size);
+	}
+}
+
 void playVibra(const uint8_t* pattern) {
 	uint8_t effects = pgm_read_byte(pattern);
 	uint8_t i = 0;
@@ -373,7 +384,9 @@ void setCanvas(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b) {
 void tetrisEvent(TetrisEvent event, uint8_t data) {
 	switch (event) {
 	case TetrisEvent::LevelUp:
+		playSuccessSound();
 		playVibra(levelUpVibra);
+
 		catris.setAnimation(Catris::Anim::Happy);
 		catris.setFormattedText(randomText(5,
 				"    You've reached level %" PRIu8 " with %" PRIu32 " points. Keep up!",
@@ -385,6 +398,8 @@ void tetrisEvent(TetrisEvent event, uint8_t data) {
 		showCatris(false);
 		break;
 	case TetrisEvent::RowsCompleted:
+		playSuccessSound();
+
 		if (surprise) {
 			uint32_t scores = tetris->getScores();
 
@@ -392,6 +407,8 @@ void tetrisEvent(TetrisEvent event, uint8_t data) {
 				surprise = false;
 				EEPROM.put(EE_ADDR_SURPRISE, surprise);
 				tray.setDesiredState(Tray::Open);
+
+				playVibra(surpriseVibra);
 
 				catris.setAnimation(Catris::Anim::InLove);
 				catris.setText("    Oh my god 2sofix! Maci has a question for you: Will you marry him?");
@@ -402,6 +419,8 @@ void tetrisEvent(TetrisEvent event, uint8_t data) {
 
 			if (!surpriseMentioned && tetris->getScores() >= SCORES_SURPRISE_TEASER) {
 				surpriseMentioned = true;
+
+				playVibra(tetrisVibra);
 
 				catris.setAnimation(Catris::Anim::Shocked);
 				catris.setFormattedText("    %" PRIu32 " points already! There is a surprise waiting for you at %d points. Press -> to go for it!", scores, SCORES_SURPRISE_REVEAL);
@@ -414,6 +433,7 @@ void tetrisEvent(TetrisEvent event, uint8_t data) {
 		switch (data) {
 		case 1:
 			playVibra(singleRowClearVibra);
+
 			if (tetris->getRowsCompleted() == 1) {
 				catris.setAnimation(Catris::Anim::Happy);
 				catris.setText(randomText(5,
@@ -431,6 +451,7 @@ void tetrisEvent(TetrisEvent event, uint8_t data) {
 			break;
 		case 3:
 			playVibra(tripleRowClearVibra);
+
 			catris.setAnimation(Catris::Anim::Happy);
 			catris.setText(randomText(5,
 					"    Three at once! You're amazing!",
@@ -443,6 +464,7 @@ void tetrisEvent(TetrisEvent event, uint8_t data) {
 			break;
 		case 4:
 			playVibra(tetrisVibra);
+
 			catris.setAnimation(Catris::Anim::Shocked);
 			catris.setText(randomText(5,
 					"    TETRIS! Your're the master!",
