@@ -360,7 +360,7 @@ void loop() {
 		    		catris.setAnimation(Catris::Anim::HighScore);
 		    		catris.setFormattedText(randomText(5,
 		    				"    Congratulations! New high score! You were at level %" PRIu8 " with %" PRIu32 " points. %s",
-							"    Amazing! You've just beaten the current high score! You were at level %" PRIu8 " with %" PRIu32 " points. %s",
+							"    Amazing! You've just beaten the high score! You were at level %" PRIu8 " with %" PRIu32 " points. %s",
 							"    That's it! New high score! You were at level %" PRIu8 " with %" PRIu32 " points. %s",
 							"    New high score! Nicely done. You were at level %" PRIu8 " with %" PRIu32 " points. %s",
 							"    Cool, new high score. You were at level %" PRIu8 " with %" PRIu32 " points. %s"),

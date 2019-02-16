@@ -88,8 +88,8 @@
 #define STATE_TETRIS      2
 
 // score triggers
-#define SCORES_SURPRISE_TEASER 100
-#define SCORES_SURPRISE_REVEAL 500
+#define SCORES_SURPRISE_TEASER 2500
+#define SCORES_SURPRISE_REVEAL 3500
 
 // low battery check interval
 #define MILLIS_LOW_BATTERY_WARNING_INTERVAL 10000
