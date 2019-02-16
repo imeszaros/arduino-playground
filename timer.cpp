@@ -3,6 +3,10 @@
 Timer::Timer(unsigned long interval):
 		_origin(_millis()), _interval(interval) {}
 
+unsigned long Timer::getInterval() {
+	return _interval;
+}
+
 void Timer::setOrigin(unsigned long origin) {
 	_origin = origin;
 }

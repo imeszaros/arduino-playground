@@ -7,6 +7,7 @@ public:
 
 	Timer(unsigned long interval);
 
+	unsigned long getInterval();
 	void setOrigin(unsigned long origin);
 	void setOriginToNow();
 	void reset(unsigned long interval);

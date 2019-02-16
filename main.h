@@ -49,6 +49,8 @@
 #include "entropy.h"
 
 // pin configuration
+#define LBO 10
+
 #define LED_SDI    11
 #define LED_SCK    12
 
@@ -61,6 +63,7 @@
 #define BTN_LEFT         23
 #define BTN_RIGHT        22
 #define BTN_DOWN         21
+#define BTN_HIGH_SCORE   19
 
 #define PI_CLSD 13
 #define PI_OPEN 14
@@ -77,6 +80,7 @@
 #define EE_ADDR_MUSIC    0
 #define EE_ADDR_SOUND    (EE_ADDR_MUSIC + sizeof(byte))
 #define EE_ADDR_SURPRISE (EE_ADDR_SOUND + sizeof(bool))
+#define EE_ADDR_HIGH_SCORE (EE_ADDR_SURPRISE + sizeof(bool))
 
 // states
 #define STATE_CATRIS_LOOP 0
@@ -87,10 +91,16 @@
 #define SCORES_SURPRISE_TEASER 100
 #define SCORES_SURPRISE_REVEAL 500
 
+// low battery check interval
+#define MILLIS_LOW_BATTERY_WARNING_INTERVAL 10000
+
 // secret functions timing
 #define MILLIS_SURPRISE_STATE   5000
 #define MILLIS_SURPRISE_TOGGLE 10000
 #define MILLIS_TRAY_TOGGLE     15000
+
+// clear high score timing
+#define MILLIS_CLEAR_HIGH_SCORE 5000
 
 // macros
 #define canvasWidth() LEDS_PER_ROW

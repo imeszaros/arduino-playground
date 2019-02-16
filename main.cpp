@@ -19,6 +19,9 @@ Catris catris(&progMemRead, &progMemRead);
 // game engine
 Tetris* tetris;
 
+// low battery signal
+Bounce lowBattery = Bounce();
+
 // buttons
 Bounce pauseButton = Bounce();
 Bounce resetButton = Bounce();
@@ -29,21 +32,26 @@ Bounce rotateRightButton = Bounce();
 Bounce leftButton = Bounce();
 Bounce rightButton = Bounce();
 Bounce downButton = Bounce();
+Bounce highScoreButton = Bounce();
 
 // timers
 Timer buttonTimer(REPEAT_INTERVAL);
 Timer rainbowTimer(5000);
-Timer surpriseTimer(0);
+Timer surpriseConfigTimer(0);
+Timer highScoreClearTimer(0);
+Timer lowBatteryWarningTimer(MILLIS_LOW_BATTERY_WARNING_INTERVAL);
 
 // persistent state variables
 byte music = 0;
 byte sound = true;
 byte surprise = true;
+uint32_t highScore = 0;
 
 // volatile state variables
 uint8_t state = STATE_CATRIS_LOOP;
 bool clearCanvasOnNextLoop = true;
 bool surpriseMentioned = false;
+bool lowBatteryDetected = false;
 
 void setup() {
 	// power-up safety delay
@@ -57,6 +65,10 @@ void setup() {
     // initialize random generator
     Entropy.initialize();
     srand(Entropy.random());
+
+    // setup low battery detection
+    lowBattery.attach(LBO, INPUT_PULLUP);
+    lowBattery.interval(5);
 
     // initialize buttons
     pauseButton.attach(BTN_PAUSE, INPUT);
@@ -86,6 +98,9 @@ void setup() {
 	downButton.attach(BTN_DOWN, INPUT);
 	downButton.interval(5);
 
+	highScoreButton.attach(BTN_HIGH_SCORE, INPUT);
+	highScoreButton.interval(5);
+
 	// initialize audio output
 	EEPROM.get(EE_ADDR_MUSIC, music);
 	EEPROM.get(EE_ADDR_SOUND, sound);
@@ -107,6 +122,9 @@ void setup() {
     tray.setDesiredState(tray.getCurrentState());
     EEPROM.get(EE_ADDR_SURPRISE, surprise);
 
+    // load high score
+    EEPROM.get(EE_ADDR_HIGH_SCORE, highScore);
+
     // initialize tetris
     tetris = new Tetris(canvasWidth(), canvasHeight(), &tetrisEvent);
     resetTetris();
@@ -124,6 +142,8 @@ void setup() {
 }
 
 void loop() {
+	lowBattery.update();
+
 	pauseButton.update();
 	resetButton.update();
 	musicButton.update();
@@ -133,6 +153,7 @@ void loop() {
 	leftButton.update();
 	rightButton.update();
 	downButton.update();
+	highScoreButton.update();
 
 	if (clearCanvasOnNextLoop) {
 		clearCanvasOnNextLoop = false;
@@ -164,9 +185,9 @@ void loop() {
 	}
 
 	if (resetButton.rose()) {
-		surpriseTimer.setOriginToNow();
+		surpriseConfigTimer.setOriginToNow();
 	} else if (resetButton.fell()) {
-		unsigned long elapsed = surpriseTimer.elapsed();
+		unsigned long elapsed = surpriseConfigTimer.elapsed();
 
 		if (elapsed >= MILLIS_SURPRISE_STATE && elapsed < MILLIS_SURPRISE_TOGGLE) {
 			catris.setAnimation(Catris::Anim::Happy);
@@ -182,6 +203,43 @@ void loop() {
 		} else if (elapsed >= MILLIS_TRAY_TOGGLE) {
 			tray.setDesiredState(tray.getDesiredState() == Tray::Closed ? Tray::Open : Tray::Closed);
 		}
+	}
+
+	if (highScore > 0) {
+		if (highScoreButton.rose()) {
+			highScoreClearTimer.setOriginToNow();
+
+			playBeepUpSound();
+			playVibra(buttonPressVibra);
+
+			catris.setAnimation(Catris::Anim::HighScore);
+			catris.setFormattedText("    The current high score is %" PRIu32 " points. Go and beat it!", highScore);
+			showCatris(false);
+		} else if (highScoreButton.fell()) {
+			if (highScoreClearTimer.elapsed() >= MILLIS_CLEAR_HIGH_SCORE) {
+				highScore = 0;
+				EEPROM.put(EE_ADDR_HIGH_SCORE, highScore);
+
+				playBeepUpSound();
+				playVibra(buttonPressVibra);
+
+				catris.setAnimation(Catris::Anim::Happy);
+				catris.setText("    As you wish. High score has been cleared.");
+				showCatris(false);
+			}
+		}
+	}
+
+	if (!lowBattery.read()) {
+		lowBatteryDetected = true;
+	}
+
+	if (lowBatteryDetected && lowBatteryWarningTimer.fire()) {
+		lowBatteryDetected = false;
+
+		catris.setAnimation(Catris::Anim::LowBattery);
+		catris.setText("    The battery is low! Please connect a charger! Press -> to continue.");
+		showCatris(true);
 	}
 
 	if (isCatris()) {
@@ -289,20 +347,42 @@ void loop() {
 
 	    if (displayTimer.fire()) {
 	    	if (tetris->isGameOver()) {
-	    		playBeepDownSound();
 	    		playVibra(gameOverVibra);
 
-	    		catris.setAnimation(Catris::Anim::Worried);
-	    		catris.setFormattedText(randomText(5,
-	    				"    Oh-no! Game over. You were at level %" PRIu8 " with %" PRIu32 " points. %s",
-						"    Damn.. Game over. You were at level %" PRIu8 " with %" PRIu32 " points. %s",
-						"    Isn't so easy, right? You were at level %" PRIu8 " with %" PRIu32 " points. %s",
-						"    Better luck next time, maybe! You were at level %" PRIu8 " with %" PRIu32 " points. %s",
-						"    Don't be sad, it's just a game.. You were at level %" PRIu8 " with %" PRIu32 " points. %s"),
+	    		uint32_t scores = tetris->getScores();
 
-	    				tetris->getLevel(),
-						tetris->getScores(),
-	    				"Press -> to try again.");
+	    		if (scores > highScore) {
+	    			playSuccessSound();
+
+	    			highScore = scores;
+	    			EEPROM.put(EE_ADDR_HIGH_SCORE, highScore);
+
+		    		catris.setAnimation(Catris::Anim::HighScore);
+		    		catris.setFormattedText(randomText(5,
+		    				"    Congratulations! New high score! You were at level %" PRIu8 " with %" PRIu32 " points. %s",
+							"    Amazing! You've just beaten the current high score! You were at level %" PRIu8 " with %" PRIu32 " points. %s",
+							"    That's it! New high score! You were at level %" PRIu8 " with %" PRIu32 " points. %s",
+							"    New high score! Nicely done. You were at level %" PRIu8 " with %" PRIu32 " points. %s",
+							"    Cool, new high score. You were at level %" PRIu8 " with %" PRIu32 " points. %s"),
+
+		    				tetris->getLevel(),
+							scores,
+		    				"Press -> to play again.");
+	    		} else {
+		    		playBeepDownSound();
+
+		    		catris.setAnimation(Catris::Anim::Worried);
+		    		catris.setFormattedText(randomText(5,
+		    				"    Oh-no! Game over. You were at level %" PRIu8 " with %" PRIu32 " points. %s",
+							"    Damn.. Game over. You were at level %" PRIu8 " with %" PRIu32 " points. %s",
+							"    Isn't so easy, right? You were at level %" PRIu8 " with %" PRIu32 " points. %s",
+							"    Better luck next time, maybe! You were at level %" PRIu8 " with %" PRIu32 " points. %s",
+							"    Don't be sad, it's just a game.. You were at level %" PRIu8 " with %" PRIu32 " points. %s"),
+
+		    				tetris->getLevel(),
+							scores,
+		    				"Press -> to try again.");
+	    		}
 
 				showCatris(true);
 	    	} else {

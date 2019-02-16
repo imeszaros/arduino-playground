@@ -9,7 +9,7 @@ Catris::Catris(fontDataReader fontDataReader, spriteDataReader spriteDataReader)
 
 	_scrollText = new ScrollText(0, 14, 10, fontDataReader, (uint8_t*) font4x5);
 
-	uint8_t delay = 150;
+	unsigned long delay = 150;
 	_happyAnimation = new Animation(12);
 	_happyAnimation->setFrame(0, delay, (uint8_t*) catrisHappy1LeftSprite);
 	_happyAnimation->setFrame(1, delay, (uint8_t*) catrisHappy2LeftSprite);
@@ -60,6 +60,19 @@ Catris::Catris(fontDataReader fontDataReader, spriteDataReader spriteDataReader)
 	_inLoveAnimation->setFrame(5, delay, (uint8_t*) catrisInLove2Sprite);
 	_inLoveAnimation->setFrame(6, delay, (uint8_t*) catrisInLove1Sprite);
 
+	delay = 200;
+	_lowBatteryAnimation = new Animation(3);
+	_lowBatteryAnimation->setFrame(0, delay, (uint8_t*) lowBattery1Sprite);
+	_lowBatteryAnimation->setFrame(1, delay, (uint8_t*) lowBattery2Sprite);
+	_lowBatteryAnimation->setFrame(2, 2000, (uint8_t*) lowBattery3Sprite);
+
+	delay = 100;
+	_highScoreAnimation = new Animation(4);
+	_highScoreAnimation->setFrame(0, 2000, (uint8_t*) highScore1Sprite);
+	_highScoreAnimation->setFrame(1, delay, (uint8_t*) highScore2Sprite);
+	_highScoreAnimation->setFrame(2, delay, (uint8_t*) highScore3Sprite);
+	_highScoreAnimation->setFrame(3, delay, (uint8_t*) highScore2Sprite);
+
 	setAnimation(Anim::Happy);
 }
 
@@ -76,6 +89,12 @@ void Catris::setAnimation(Anim animation) {
 		break;
 	case Anim::InLove:
 		_loadAnimation(_inLoveAnimation);
+		break;
+	case Anim::LowBattery:
+		_loadAnimation(_lowBatteryAnimation);
+		break;
+	case Anim::HighScore:
+		_loadAnimation(_highScoreAnimation);
 		break;
 	}
 }

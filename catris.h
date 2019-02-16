@@ -15,7 +15,9 @@ public:
 		Happy,
 		Shocked,
 		Worried,
-		InLove
+		InLove,
+		LowBattery,
+		HighScore
 	};
 
 	Catris(fontDataReader fontDataReader, spriteDataReader spriteDataReader);
@@ -44,6 +46,8 @@ private:
 	Animation* _shockedAnimation;
 	Animation* _worriedAnimation;
 	Animation* _inLoveAnimation;
+	Animation* _lowBatteryAnimation;
+	Animation* _highScoreAnimation;
 
 	uint8_t _animFrame;
 
