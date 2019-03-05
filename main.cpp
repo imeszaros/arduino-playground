@@ -39,7 +39,7 @@ Timer buttonTimer(REPEAT_INTERVAL);
 Timer rainbowTimer(5000);
 Timer surpriseConfigTimer(0);
 Timer highScoreClearTimer(0);
-Timer lowBatteryWarningTimer(MILLIS_LOW_BATTERY_WARNING_INTERVAL);
+Timer batteryCheckTimer(MILLIS_BATTERY_CHECK_INTERVAL);
 
 // persistent state variables
 byte music = 0;
@@ -52,6 +52,7 @@ uint8_t state = STATE_CATRIS_LOOP;
 bool clearCanvasOnNextLoop = true;
 bool surpriseMentioned = false;
 bool lowBatteryDetected = false;
+uint8_t lowBatteryCounter = 0;
 
 void setup() {
 	// power-up safety delay
@@ -230,22 +231,36 @@ void loop() {
 		}
 	}
 
-	if (!lowBattery.read()) {
-		lowBatteryDetected = true;
-	}
-
-	if (lowBatteryDetected && lowBatteryWarningTimer.fire()) {
+	// low battery detection
+	if (lowBattery.read()) {
 		lowBatteryDetected = false;
+		lowBatteryCounter = 0;
+	} else {
+		if (batteryCheckTimer.fire()) {
+			if (lowBatteryCounter >= LOW_BAT_DETECTION_LIMIT) {
+				lowBatteryCounter = 0;
+				lowBatteryDetected = true;
 
-		catris.setAnimation(Catris::Anim::LowBattery);
-		catris.setText("    The battery is low! Please connect a charger! Press -> to continue.");
-		showCatris(true);
+				if (!isCatris() || catris.getAnimation() != Catris::Anim::LowBattery) {
+					catris.setAnimation(Catris::Anim::LowBattery);
+					catris.setText("    The battery is low! Please connect a charger! Press -> to continue.");
+					showCatris(true);
+				}
+			} else {
+				lowBatteryCounter++;
+			}
+		}
 	}
 
 	if (isCatris()) {
 		if (rightButton.rose()) {
 			buttonRepeat(true);
 
+			playBeepUpSound();
+			playVibra(buttonPressVibra);
+
+			showTetris();
+		} else if (catris.getAnimation() == Catris::Anim::LowBattery && !lowBatteryDetected) {
 			playBeepUpSound();
 			playVibra(buttonPressVibra);
 

@@ -76,7 +76,12 @@ Catris::Catris(fontDataReader fontDataReader, spriteDataReader spriteDataReader)
 	setAnimation(Anim::Happy);
 }
 
+Catris::Anim Catris::getAnimation() {
+	return _currentAnim;
+}
+
 void Catris::setAnimation(Anim animation) {
+	_currentAnim = animation;
 	switch (animation) {
 	case Anim::Happy:
 		_loadAnimation(_happyAnimation);

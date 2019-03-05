@@ -1,6 +1,8 @@
 #ifndef _main_H_
 #define _main_H_
 
+//#define BREADBOARD
+
 #include "Arduino.h"
 
 // debug mode
@@ -54,6 +56,7 @@
 #define LED_SDI    11
 #define LED_SCK    12
 
+#ifdef BREADBOARD
 #define BTN_PAUSE        27
 #define BTN_SOUND        28
 #define BTN_MUSIC        29
@@ -64,6 +67,18 @@
 #define BTN_RIGHT        22
 #define BTN_DOWN         21
 #define BTN_HIGH_SCORE   19
+#else
+#define BTN_PAUSE        29
+#define BTN_SOUND        19
+#define BTN_MUSIC        20
+#define BTN_RESET        28
+#define BTN_ROTATE_LEFT  30
+#define BTN_ROTATE_RIGHT 22
+#define BTN_LEFT         31
+#define BTN_RIGHT        23
+#define BTN_DOWN         21
+#define BTN_HIGH_SCORE   27
+#endif
 
 #define PI_CLSD 13
 #define PI_OPEN 14
@@ -91,8 +106,9 @@
 #define SCORES_SURPRISE_TEASER 2500
 #define SCORES_SURPRISE_REVEAL 3500
 
-// low battery check interval
-#define MILLIS_LOW_BATTERY_WARNING_INTERVAL 10000
+// low battery detection
+#define LOW_BAT_DETECTION_LIMIT 30
+#define MILLIS_BATTERY_CHECK_INTERVAL 1000
 
 // secret functions timing
 #define MILLIS_SURPRISE_STATE   5000

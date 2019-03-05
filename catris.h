@@ -22,6 +22,7 @@ public:
 
 	Catris(fontDataReader fontDataReader, spriteDataReader spriteDataReader);
 
+	Anim getAnimation();
 	void setAnimation(Anim animation);
 	void setText(const char* text);
 	void setFormattedText(const char* format, ...);
@@ -40,6 +41,7 @@ private:
 	ScrollText* _scrollText;
 	char* _buffer;
 
+	Anim _currentAnim;
 	Animation* _currentAnimation;
 
 	Animation* _happyAnimation;
