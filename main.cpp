@@ -70,6 +70,8 @@ void setup() {
     // setup low battery detection
     lowBattery.attach(LBO, INPUT_PULLUP);
     lowBattery.interval(5);
+    pinMode(LED_LB, OUTPUT);
+    digitalWrite(LED_LB, LOW);
 
     // initialize buttons
     pauseButton.attach(BTN_PAUSE, INPUT);
@@ -235,11 +237,13 @@ void loop() {
 	if (lowBattery.read()) {
 		lowBatteryDetected = false;
 		lowBatteryCounter = 0;
+	    digitalWrite(LED_LB, LOW);
 	} else {
 		if (batteryCheckTimer.fire()) {
 			if (lowBatteryCounter >= LOW_BAT_DETECTION_LIMIT) {
 				lowBatteryCounter = 0;
 				lowBatteryDetected = true;
+			    digitalWrite(LED_LB, HIGH);
 
 				if (!isCatris() || catris.getAnimation() != Catris::Anim::LowBattery) {
 					catris.setAnimation(Catris::Anim::LowBattery);

@@ -52,6 +52,7 @@
 
 // pin configuration
 #define LBO 10
+#define LED_LB 18
 
 #define LED_SDI    11
 #define LED_SCK    12
