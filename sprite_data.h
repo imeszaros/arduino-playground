@@ -3,6 +3,14 @@
 
 #include <Arduino.h>
 
+//#define SPRITES_IN_PROGMEM
+
+#ifdef SPRITES_IN_PROGMEM
+	#define SPRITE_STORAGE PROGMEM
+#else
+	#define SPRITE_STORAGE
+#endif
+
 const uint8_t spritePalette[][3] {
 		{200, 200, 200},
 		{255, 104, 107},
@@ -15,7 +23,7 @@ const uint8_t spritePalette[][3] {
         {204, 114,   4}
 };
 
-const uint8_t PROGMEM catrisHappy1LeftSprite[] = {
+const uint8_t SPRITE_STORAGE catrisHappy1LeftSprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 36,
@@ -36,7 +44,7 @@ const uint8_t PROGMEM catrisHappy1LeftSprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisHappy1RightSprite[] = {
+const uint8_t SPRITE_STORAGE catrisHappy1RightSprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 36,
@@ -57,7 +65,7 @@ const uint8_t PROGMEM catrisHappy1RightSprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisHappy2LeftSprite[] = {
+const uint8_t SPRITE_STORAGE catrisHappy2LeftSprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 36,
@@ -78,7 +86,7 @@ const uint8_t PROGMEM catrisHappy2LeftSprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisHappy2RightSprite[] = {
+const uint8_t SPRITE_STORAGE catrisHappy2RightSprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 36,
@@ -99,7 +107,7 @@ const uint8_t PROGMEM catrisHappy2RightSprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisHappy3LeftSprite[] = {
+const uint8_t SPRITE_STORAGE catrisHappy3LeftSprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 36,
@@ -120,7 +128,7 @@ const uint8_t PROGMEM catrisHappy3LeftSprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisHappy3RightSprite[] = {
+const uint8_t SPRITE_STORAGE catrisHappy3RightSprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 36,
@@ -141,7 +149,7 @@ const uint8_t PROGMEM catrisHappy3RightSprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisShocked1Sprite[] = {
+const uint8_t SPRITE_STORAGE catrisShocked1Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 36,
@@ -162,7 +170,7 @@ const uint8_t PROGMEM catrisShocked1Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisShocked2Sprite[] = {
+const uint8_t SPRITE_STORAGE catrisShocked2Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 36,
@@ -183,7 +191,7 @@ const uint8_t PROGMEM catrisShocked2Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisShocked3Sprite[] = {
+const uint8_t SPRITE_STORAGE catrisShocked3Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 36,
@@ -200,7 +208,7 @@ const uint8_t PROGMEM catrisShocked3Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisWorried1Sprite[] = {
+const uint8_t SPRITE_STORAGE catrisWorried1Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 34,
@@ -221,7 +229,7 @@ const uint8_t PROGMEM catrisWorried1Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisWorried2Sprite[] = {
+const uint8_t SPRITE_STORAGE catrisWorried2Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 34,
@@ -242,7 +250,7 @@ const uint8_t PROGMEM catrisWorried2Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisWorried3Sprite[] = {
+const uint8_t SPRITE_STORAGE catrisWorried3Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 34,
@@ -263,7 +271,7 @@ const uint8_t PROGMEM catrisWorried3Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisWorried4Sprite[] = {
+const uint8_t SPRITE_STORAGE catrisWorried4Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 34,
@@ -284,7 +292,7 @@ const uint8_t PROGMEM catrisWorried4Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisInLove1Sprite[] = {
+const uint8_t SPRITE_STORAGE catrisInLove1Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 32,
@@ -305,7 +313,7 @@ const uint8_t PROGMEM catrisInLove1Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisInLove2Sprite[] = {
+const uint8_t SPRITE_STORAGE catrisInLove2Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 32,
@@ -326,7 +334,7 @@ const uint8_t PROGMEM catrisInLove2Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisInLove3Sprite[] = {
+const uint8_t SPRITE_STORAGE catrisInLove3Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 32,
@@ -347,7 +355,7 @@ const uint8_t PROGMEM catrisInLove3Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM catrisInLove4Sprite[] = {
+const uint8_t SPRITE_STORAGE catrisInLove4Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 32,
@@ -368,7 +376,7 @@ const uint8_t PROGMEM catrisInLove4Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM lowBattery1Sprite[] = {
+const uint8_t SPRITE_STORAGE lowBattery1Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 26,
@@ -381,7 +389,7 @@ const uint8_t PROGMEM lowBattery1Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM lowBattery2Sprite[] = {
+const uint8_t SPRITE_STORAGE lowBattery2Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 26,
@@ -394,7 +402,7 @@ const uint8_t PROGMEM lowBattery2Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM lowBattery3Sprite[] = {
+const uint8_t SPRITE_STORAGE lowBattery3Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 26,
@@ -407,7 +415,7 @@ const uint8_t PROGMEM lowBattery3Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM highScore1Sprite[] = {
+const uint8_t SPRITE_STORAGE highScore1Sprite[] = {
 
 		/* color:  */ 5,
 		/* pixels: */ 36,
@@ -424,7 +432,7 @@ const uint8_t PROGMEM highScore1Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM highScore2Sprite[] = {
+const uint8_t SPRITE_STORAGE highScore2Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 3,
@@ -445,7 +453,7 @@ const uint8_t PROGMEM highScore2Sprite[] = {
 		/* end:    */ 0b00000000, 0b00000000
 };
 
-const uint8_t PROGMEM highScore3Sprite[] = {
+const uint8_t SPRITE_STORAGE highScore3Sprite[] = {
 
 		/* color:  */ 0,
 		/* pixels: */ 7,

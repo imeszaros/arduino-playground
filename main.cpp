@@ -14,7 +14,19 @@ Tray tray(PI_CLSD, PI_OPEN, M_ENABLE, M_CTRL_1, M_CTRL_2);
 pmf_player audio;
 
 // catris
-Catris catris(&progMemRead, &progMemRead);
+Catris catris(
+#ifdef FONTS_IN_PROGMEM
+	&progMemRead
+#else
+	&directMemRead
+#endif
+,
+#ifdef SPRITES_IN_PROGMEM
+	&progMemRead
+#else
+	&directMemRead
+#endif
+);
 
 // game engine
 Tetris* tetris;
@@ -643,6 +655,10 @@ void showCatris(bool loop) {
 
 uint8_t progMemRead(uint8_t* addr) {
 	return pgm_read_byte(addr);
+}
+
+uint8_t directMemRead(uint8_t* addr) {
+	return *addr;
 }
 
 const char* randomText(uint8_t count, ...) {

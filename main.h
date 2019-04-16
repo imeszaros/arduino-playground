@@ -140,6 +140,7 @@ bool isCatris();
 void showCatris(bool loop);
 void setCanvas(int8_t x, int8_t y, uint8_t r, uint8_t g, uint8_t b);
 uint8_t progMemRead(uint8_t* addr);
+uint8_t directMemRead(uint8_t* addr);
 const char* randomText(uint8_t count, ...);
 
 #endif

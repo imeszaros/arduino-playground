@@ -3,7 +3,15 @@
 
 #include <Arduino.h>
 
-const uint8_t PROGMEM font4x5[] = {
+//#define FONTS_IN_PROGMEM
+
+#ifdef FONTS_IN_PROGMEM
+	#define FONT_STORAGE PROGMEM
+#else
+	#define FONT_STORAGE
+#endif
+
+const uint8_t FONT_STORAGE font4x5[] = {
 
 		// header: char height | bytes per char
 		(5 << 4) | 3,
