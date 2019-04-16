@@ -69,15 +69,15 @@
 #define BTN_DOWN         21
 #define BTN_HIGH_SCORE   19
 #else
-#define BTN_PAUSE        29
+#define BTN_PAUSE        31
 #define BTN_SOUND        19
 #define BTN_MUSIC        20
 #define BTN_RESET        28
-#define BTN_ROTATE_LEFT  30
-#define BTN_ROTATE_RIGHT 22
-#define BTN_LEFT         31
-#define BTN_RIGHT        23
-#define BTN_DOWN         21
+#define BTN_ROTATE_LEFT  29
+#define BTN_ROTATE_RIGHT 21
+#define BTN_LEFT         30
+#define BTN_RIGHT        22
+#define BTN_DOWN         23
 #define BTN_HIGH_SCORE   27
 #endif
 
