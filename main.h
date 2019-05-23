@@ -2,6 +2,7 @@
 #define _main_H_
 
 //#define BREADBOARD
+//#define TRAY_CALIBRATION
 
 #include "Arduino.h"
 

@@ -71,6 +71,10 @@ Pile::Pile(uint8_t _width, uint8_t _height):
 	truncate();
 }
 
+Pile::~Pile() {
+	delete _data;
+}
+
 bool Pile::isOccupied(uint8_t x, int8_t y) {
 	return _get(x, y) != Tetromino::Type::_;
 }
@@ -241,6 +245,15 @@ Tetris::Tetris(uint8_t _width,  uint8_t _height, tetrisListener _listener):
 
 	_updateTimer = new Timer(500);
 	_ghostTimer = new Timer(1000);
+}
+
+Tetris::~Tetris() {
+	delete _tetromino;
+	delete _pile;
+	delete _bag;
+
+	delete _updateTimer;
+	delete _ghostTimer;
 }
 
 void Tetris::reset() {

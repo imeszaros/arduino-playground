@@ -134,6 +134,8 @@ void setup() {
 
     // initialize tray control
     tray.init();
+    tray.setClosingDelay(120);
+    tray.setOpeningDelay(80);
     tray.setDesiredState(tray.getCurrentState());
     EEPROM.get(EE_ADDR_SURPRISE, surprise);
 
@@ -155,6 +157,92 @@ void setup() {
 
     		"I am your guide, Catris. Ready to play? Press -> to begin.");
 }
+
+#ifdef TRAY_CALIBRATION
+unsigned long closingDelay = 120;
+unsigned long openingDelay = 80;
+
+void loop() {
+	lowBattery.update();
+
+	pauseButton.update();
+	resetButton.update();
+	musicButton.update();
+	soundButton.update();
+	rotateLeftButton.update();
+	rotateRightButton.update();
+	leftButton.update();
+	rightButton.update();
+	downButton.update();
+	highScoreButton.update();
+
+	if (clearCanvasOnNextLoop) {
+		clearCanvasOnNextLoop = false;
+		clrscr();
+	}
+
+	if (highScoreButton.rose()) {
+		catris.setText("    motor off");
+		tray.setDesiredState(Tray::Off);
+	}
+
+	if (soundButton.rose()) {
+		catris.setText("    opening tray");
+		tray.setDesiredState(Tray::Open);
+	}
+
+	if (musicButton.rose()) {
+		catris.setText("    closing tray");
+		tray.setDesiredState(Tray::Closed);
+	}
+
+	if (pauseButton.rose()) {
+		closingDelay -= closingDelay == 0 ? 0 : 10;
+		tray.setClosingDelay(closingDelay);
+		catris.setFormattedText("   CD: %d", closingDelay);
+	}
+
+	if (downButton.rose()) {
+		closingDelay += 10;
+		tray.setClosingDelay(closingDelay);
+		catris.setFormattedText("   CD: %d", closingDelay);
+	}
+
+	if (leftButton.rose()) {
+		openingDelay -= openingDelay == 0 ? 0 : 10;
+		tray.setOpeningDelay(openingDelay);
+		catris.setFormattedText("   OD: %d", openingDelay);
+	}
+
+	if (rightButton.rose()) {
+		openingDelay += 10;
+		tray.setOpeningDelay(openingDelay);
+		catris.setFormattedText("   OD: %d", openingDelay);
+	}
+
+	//if (rotateLeftButton.rose()) {
+	//	catris.setText("rot l");
+	//}
+
+	//if (rotateRightButton.rose()) {
+	//	catris.setText("rot r");
+	//}
+
+	//if (resetButton.rose()) {
+	//	catris.setText("reset");
+	//}
+
+	catris.update();
+
+    if (displayTimer.fire()) {
+    	catris.draw(&setCanvas);
+    	FastLED.show();
+    }
+
+	tray.update();
+}
+
+#else
 
 void loop() {
 	lowBattery.update();
@@ -430,6 +518,8 @@ void loop() {
 
 	tray.update();
 }
+
+#endif
 
 void playMusic() {
 	switch (music) {

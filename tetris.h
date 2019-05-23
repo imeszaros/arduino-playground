@@ -190,6 +190,8 @@ public:
 
 	Pile(uint8_t width, uint8_t height);
 
+	~Pile();
+
 	bool isOccupied(uint8_t x, int8_t y);
 	void merge(Tetromino* tetromino);
 	uint8_t clearCompleteRows();
@@ -230,6 +232,8 @@ class Tetris {
 public:
 
 	Tetris(uint8_t width,  uint8_t height, tetrisListener _listener);
+
+	~Tetris();
 
 	void reset();
 	bool isGameOver();

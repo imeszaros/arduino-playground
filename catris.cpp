@@ -76,6 +76,21 @@ Catris::Catris(fontDataReader fontDataReader, spriteDataReader spriteDataReader)
 	setAnimation(Anim::Happy);
 }
 
+Catris::~Catris() {
+	delete _rainbowTimer;
+	delete _scrollTimer;
+	delete _animTimer;
+
+	delete _scrollText;
+
+	delete _happyAnimation;
+	delete _shockedAnimation;
+	delete _worriedAnimation;
+	delete _inLoveAnimation;
+	delete _lowBatteryAnimation;
+	delete _highScoreAnimation;
+}
+
 Catris::Anim Catris::getAnimation() {
 	return _currentAnim;
 }

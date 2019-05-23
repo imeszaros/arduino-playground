@@ -13,9 +13,12 @@ public:
 	void reset(unsigned long interval);
 	float progress(bool constrain);
 	unsigned long elapsed();
+	void setEnabled(bool enabled);
 	bool fire();
 
 private:
+
+	bool _enabled;
 
 	unsigned long _origin;
 	unsigned long _interval;

@@ -22,6 +22,8 @@ public:
 
 	Catris(fontDataReader fontDataReader, spriteDataReader spriteDataReader);
 
+	~Catris();
+
 	Anim getAnimation();
 	void setAnimation(Anim animation);
 	void setText(const char* text);
