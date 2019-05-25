@@ -134,8 +134,8 @@ void setup() {
 
     // initialize tray control
     tray.init();
-    tray.setClosingDelay(120);
-    tray.setOpeningDelay(80);
+    tray.setClosingDelay(TRAY_CLOSING_DELAY);
+    tray.setOpeningDelay(TRAY_OPENING_DELAY);
     tray.setDesiredState(tray.getCurrentState());
     EEPROM.get(EE_ADDR_SURPRISE, surprise);
 
@@ -150,17 +150,17 @@ void setup() {
     catris.setAnimation(Catris::Anim::Happy);
     catris.setFormattedText(randomText(5,
     		"    *purr-purr* Hello, 2sofix! %s",
-			"    Howdy, 2sofix! %s",
+			"    How's it going, 2sofix? %s",
 			"    Feeling good, 2sofix? %s",
 			"    Welcome back, 2sofix! %s",
 			"    *meow-meow* Hi there, 2sofix! %s"),
 
-    		"I am your guide, Catris. Ready to play? Press -> to begin.");
+    		"I am your guide, Catris. Ready to play? Press >> to begin.");
 }
 
 #ifdef TRAY_CALIBRATION
-unsigned long closingDelay = 120;
-unsigned long openingDelay = 80;
+unsigned long closingDelay = 0;
+unsigned long openingDelay = 0;
 
 void loop() {
 	lowBattery.update();
@@ -219,18 +219,6 @@ void loop() {
 		tray.setOpeningDelay(openingDelay);
 		catris.setFormattedText("   OD: %d", openingDelay);
 	}
-
-	//if (rotateLeftButton.rose()) {
-	//	catris.setText("rot l");
-	//}
-
-	//if (rotateRightButton.rose()) {
-	//	catris.setText("rot r");
-	//}
-
-	//if (resetButton.rose()) {
-	//	catris.setText("reset");
-	//}
 
 	catris.update();
 
@@ -347,7 +335,7 @@ void loop() {
 
 				if (!isCatris() || catris.getAnimation() != Catris::Anim::LowBattery) {
 					catris.setAnimation(Catris::Anim::LowBattery);
-					catris.setText("    The battery is low! Please connect a charger! Press -> to continue.");
+					catris.setText("    The battery is low! Please connect a charger! Press >> to continue.");
 					showCatris(true);
 				}
 			} else {
@@ -486,7 +474,7 @@ void loop() {
 
 		    				tetris->getLevel(),
 							scores,
-		    				"Press -> to play again.");
+		    				"Press >> to play again.");
 	    		} else {
 		    		playBeepDownSound();
 
@@ -500,7 +488,7 @@ void loop() {
 
 		    				tetris->getLevel(),
 							scores,
-		    				"Press -> to try again.");
+		    				"Press >> to try again.");
 	    		}
 
 				showCatris(true);
@@ -624,7 +612,7 @@ void tetrisEvent(TetrisEvent event, uint8_t data) {
 				playVibra(tetrisVibra);
 
 				catris.setAnimation(Catris::Anim::Shocked);
-				catris.setFormattedText("    %" PRIu32 " points already! There is a surprise waiting for you at %d points. Press -> to go for it!", scores, SCORES_SURPRISE_REVEAL);
+				catris.setFormattedText("    %" PRIu32 " points already! There is a surprise waiting for you at %d points. Press >> to go for it!", scores, SCORES_SURPRISE_REVEAL);
 				showCatris(true);
 
 				return;
@@ -669,7 +657,7 @@ void tetrisEvent(TetrisEvent event, uint8_t data) {
 			catris.setAnimation(Catris::Anim::Shocked);
 			catris.setText(randomText(5,
 					"    TETRIS! Your're the master!",
-					"    TETRIS! All could learn from you!",
+					"    TETRIS! Teach me please!",
 					"    TETRIS! Are you on steroids?",
 					"    TETRIS! Tetrominoes, obey 2sofix!",
 					"    TETRIS! It's just crazy!"));

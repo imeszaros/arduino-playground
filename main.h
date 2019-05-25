@@ -105,8 +105,8 @@
 #define STATE_TETRIS      2
 
 // score triggers
-#define SCORES_SURPRISE_TEASER 2500
-#define SCORES_SURPRISE_REVEAL 3500
+#define SCORES_SURPRISE_TEASER 1500
+#define SCORES_SURPRISE_REVEAL 3000
 
 // low battery detection
 #define LOW_BAT_DETECTION_LIMIT 30
@@ -119,6 +119,10 @@
 
 // clear high score timing
 #define MILLIS_CLEAR_HIGH_SCORE 5000
+
+// tray
+#define TRAY_CLOSING_DELAY 120
+#define TRAY_OPENING_DELAY  80
 
 // macros
 #define canvasWidth() LEDS_PER_ROW
