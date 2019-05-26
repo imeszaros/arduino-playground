@@ -582,7 +582,7 @@ void tetrisEvent(TetrisEvent event, uint8_t data) {
 				"    It's level %" PRIu8 " already! You have %" PRIu32 " points. You rock!",
 				"    Level %" PRIu8 " is here! Precious %" PRIu32 " points are now yours.",
 				"    There's no stopping. Let's see level %" PRIu8 ". %" PRIu32 " points earned so far.",
-				"    What a march! Here comes level %" PRIu8 "! Mighty %" PRIu32 " points for you."), data, tetris->getScores());
+				"    Easy peasy! Here comes level %" PRIu8 "! Mighty %" PRIu32 " points for you."), data, tetris->getScores());
 
 		showCatris(false);
 		break;
@@ -600,7 +600,7 @@ void tetrisEvent(TetrisEvent event, uint8_t data) {
 				playVibra(surpriseVibra);
 
 				catris.setAnimation(Catris::Anim::InLove);
-				catris.setText("    Oh my god 2sofix! Maci has a question for you: Will you marry him?");
+				catris.setText("    OMG 2sofix! Maci has a question for you: Will you marry him?");
 				showCatris(true);
 
 				return;
